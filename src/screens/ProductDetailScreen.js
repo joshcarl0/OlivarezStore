@@ -77,25 +77,44 @@ export default function ProductDetailScreen({ navigation, route }) {
       >
         {/* ── HERO IMAGE CARD ── */}
         <View style={styles.heroCard}>
-          <View style={styles.heroIllustration}>
-            {product.imageType === "skirt" ? (
-              <MaterialCommunityIcons name="skirt" size={130} color="#2b5937" />
-            ) : product.imageType === "lace" ? (
-              <Ionicons name="ribbon-outline" size={120} color="#2b5937" />
-            ) : product.imageType === "tie" ? (
-              <MaterialCommunityIcons name="tie" size={120} color="#2b5937" />
-            ) : (
-              <View style={{ alignItems: "center" }}>
-                <MaterialCommunityIcons name="tshirt-v" size={140} color="#ffffff" />
-                <View style={styles.heroTie} />
-              </View>
-            )}
-          </View>
+          {product.image_url ? (
+            <Image
+              source={{ uri: product.image_url }}
+              style={styles.heroRealImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.heroIllustration}>
+              {product.imageType === "skirt" ? (
+                <MaterialCommunityIcons name="skirt" size={130} color="#2b5937" />
+              ) : product.imageType === "lace" ? (
+                <Ionicons name="ribbon-outline" size={120} color="#2b5937" />
+              ) : product.imageType === "tie" ? (
+                <MaterialCommunityIcons name="tie" size={120} color="#2b5937" />
+              ) : (
+                <View style={{ alignItems: "center" }}>
+                  <MaterialCommunityIcons name="tshirt-v" size={140} color="#ffffff" />
+                  <View style={styles.heroTie} />
+                </View>
+              )}
+            </View>
+          )}
+          {product.course_strand && product.course_strand !== "All" && (
+            <View style={styles.courseBadgeFloating}>
+              <Text style={styles.courseBadgeFloatingText}>{product.course_strand}</Text>
+            </View>
+          )}
         </View>
 
         {/* ── TITLE & PRICE ROW ── */}
         <View style={styles.titlePriceRow}>
           <View style={{ flex: 1, marginRight: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <Text style={styles.deptTag}>{product.department || "College"}</Text>
+              {product.course_strand && product.course_strand !== "All" && (
+                <Text style={styles.courseTag}>{product.course_strand}</Text>
+              )}
+            </View>
             <Text style={styles.productTitle}>{product.name}</Text>
             <Text style={styles.productSubtitle}>
               {product.description || "Official Olivarez College Merchandise"}
@@ -252,6 +271,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
+    overflow: "hidden",
+    position: "relative",
+  },
+  heroRealImage: {
+    width: "100%",
+    height: "100%",
+  },
+  courseBadgeFloating: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: OC_GREEN,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  courseBadgeFloatingText: {
+    color: "#ffffff",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+  },
+  deptTag: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#6c757d",
+    backgroundColor: "#e9ecef",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  courseTag: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: OC_GREEN,
+    backgroundColor: "#e8f5ec",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   heroIllustration: {
     alignItems: "center",

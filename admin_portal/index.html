@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olivarez College — Super Admin Executive Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Banner / Navigation -->
+  <header class="admin-topbar">
+    <div class="topbar-brand">
+      <div class="brand-crest">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#f5a623" stroke="#f5a623"/>
+          <path d="M12 6v12M8 12h8" stroke="#103c1d" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">OLIVAREZ COLLEGE</div>
+        <div class="brand-sub">UNIFORM STORE SUPPLY • SUPER ADMIN PORTAL</div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="system-badge">
+        <span class="pulsing-dot"></span>
+        <span>XAMPP / MySQL Online</span>
+      </div>
+      <a href="http://localhost/olivarez_staff/" target="_blank" class="nav-switch-btn" title="Open Staff Cashier Counter">
+        <span>🏪 Staff Counter</span>
+      </a>
+      <div class="admin-user-pill">
+        <div class="user-avatar">AD</div>
+        <div class="user-meta">
+          <div class="user-name" id="currentAdminName">Administrator</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="nav-section-title">MAIN MENU</div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="analytics" id="tabBtnAnalytics">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          <span>Executive KPI</span>
+        </button>
+        <button class="nav-item" data-tab="catalog" id="tabBtnCatalog">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+          <span>Uniforms & Course Catalog</span>
+        </button>
+        <button class="nav-item" data-tab="orders" id="tabBtnOrders">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <span>Orders & Releasing</span>
+        </button>
+        <button class="nav-item" data-tab="students" id="tabBtnStudents">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Student Directory</span>
+        </button>
+        <button class="nav-item" data-tab="staff" id="tabBtnStaff">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Staff Accounts</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-help-card">
+          <div class="help-title">College Courses Tagging</div>
+          <div class="help-desc">Assign specific uniforms for Nursing (BSN), Criminology (BSCrim), Tourism (BSTM), Hospitality (BSHM), and Customs (BSCA).</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- TAB 1: EXECUTIVE KPI & ANALYTICS -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <section id="sectionAnalytics" class="tab-pane active">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Executive Dashboard</h1>
+            <p class="pane-subtitle">Live store financial metrics, course uniform status, and student demand</p>
+          </div>
+          <button class="btn-refresh" id="btnRefreshAnalytics" title="Refresh metrics">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            <span>Sync Data</span>
+          </button>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card revenue-card">
+            <div class="kpi-icon-wrap gold">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <div class="kpi-content">
+              <div class="kpi-label">TOTAL STORE REVENUE</div>
+              <div class="kpi-value" id="kpiTotalRevenue">₱0.00</div>
+              <div class="kpi-meta">
+                <span class="meta-tag green" id="kpiCompletedSales">₱0.00 Claimed</span>
+                <span class="meta-tag orange" id="kpiPendingSales">₱0.00 Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap green">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <div class="kpi-content">
+              <div class="kpi-label">TOTAL ORDERS PLACED</div>
+              <div class="kpi-value" id="kpiTotalOrders">0</div>
+              <div class="kpi-meta">
+                <span class="meta-tag green" id="kpiCompletedOrders">0 Completed</span>
+                <span class="meta-tag blue" id="kpiPendingOrders">0 Pending Claim</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap teal">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            </div>
+            <div class="kpi-content">
+              <div class="kpi-label">TOTAL UNIFORM SKUS</div>
+              <div class="kpi-value" id="kpiTotalProducts">0</div>
+              <div class="kpi-meta">
+                <span class="meta-tag red" id="kpiLowStockCount">0 Low Stock Alert</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap purple">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8z"/></svg>
+            </div>
+            <div class="kpi-content">
+              <div class="kpi-label">REGISTERED STUDENTS</div>
+              <div class="kpi-value" id="kpiTotalStudents">0</div>
+              <div class="kpi-meta">
+                <span class="meta-tag purple" id="kpiTotalStaff">0 Staff Accounts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Columns: College Courses Uniform Breakdown & Department Inventory -->
+        <div class="charts-row">
+          <!-- College Course Uniform Breakdown -->
+          <div class="chart-card">
+            <div class="card-header-bar">
+              <div>
+                <h3 class="card-title">College Programs — Course Uniforms</h3>
+                <p class="card-desc">Stock inventory assigned per college department / course</p>
+              </div>
+              <span class="badge-dept">Higher Education</span>
+            </div>
+            <div class="course-breakdown-list" id="courseBreakdownList">
+              <div class="skeleton-row">Loading courses...</div>
+            </div>
+          </div>
+
+          <!-- Inventory by Department -->
+          <div class="chart-card">
+            <div class="card-header-bar">
+              <div>
+                <h3 class="card-title">Inventory by Education Level</h3>
+                <p class="card-desc">Stock distribution across College, SHS, JHS, and Basic Ed</p>
+              </div>
+              <span class="badge-dept">School-wide</span>
+            </div>
+            <div class="dept-breakdown-list" id="deptBreakdownList">
+              <div class="skeleton-row">Loading departments...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Low Stock Alert & Recent Orders Row -->
+        <div class="charts-row">
+          <!-- Low Stock Notice -->
+          <div class="chart-card">
+            <div class="card-header-bar">
+              <div>
+                <h3 class="card-title">Inventory Restock Watchlist</h3>
+                <p class="card-desc">Items with stock level below 20 pieces</p>
+              </div>
+              <span class="status-chip danger">Critical Alert</span>
+            </div>
+            <div class="stock-watchlist-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Uniform Name</th>
+                    <th>Course / Dept</th>
+                    <th>Price</th>
+                    <th>Stock Remaining</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="lowStockTableBody">
+                  <tr><td colspan="5" class="table-empty">Loading inventory alerts...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Orders -->
+          <div class="chart-card">
+            <div class="card-header-bar">
+              <div>
+                <h3 class="card-title">Recent Claim Transactions</h3>
+                <p class="card-desc">Latest student orders placed in the mobile app</p>
+              </div>
+            </div>
+            <div class="recent-orders-list" id="recentOrdersList">
+              <div class="skeleton-row">Loading transactions...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- TAB 2: UNIFORM CATALOG & COURSE TAGGING -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <section id="sectionCatalog" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Uniforms & Catalog Management</h1>
+            <p class="pane-subtitle">Manage uniform SKUs, course tags (Nursing, Criminology, Tourism, etc.), prices, and photos</p>
+          </div>
+          <button class="btn-primary" id="btnOpenAddModal">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Add New Uniform</span>
+          </button>
+        </div>
+
+        <!-- Filter and Search Toolbar -->
+        <div class="catalog-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="catalogSearchInput" placeholder="Search uniform name, course (e.g. BSN, BSCrim)...">
+          </div>
+
+          <div class="filter-group">
+            <label>Department:</label>
+            <select id="catalogDeptSelect">
+              <option value="All">All Departments</option>
+              <option value="College">College (Higher Ed)</option>
+              <option value="Senior High">Senior High (SHS)</option>
+              <option value="Junior High">Junior High (JHS)</option>
+              <option value="Elementary">Elementary</option>
+              <option value="Kindergarten">Kindergarten</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Course / Strand:</label>
+            <select id="catalogCourseSelect">
+              <option value="All">All Courses / Strands</option>
+              <option value="BSN">BSN (Nursing)</option>
+              <option value="BSCrim">BSCrim (Criminology)</option>
+              <option value="BSHM">BSHM (Hospitality)</option>
+              <option value="BSTM">BSTM (Tourism)</option>
+              <option value="BSCA">BSCA (Customs Admin)</option>
+              <option value="BSRT">BSRT (RadTech)</option>
+              <option value="General College">General College</option>
+              <option value="STEM">STEM</option>
+              <option value="TVL">TVL Culinary / ICT</option>
+            </select>
+          </div>
+
+          <div class="catalog-count-pill" id="catalogCountPill">
+            <span>Showing 0 uniforms</span>
+          </div>
+        </div>
+
+        <!-- Uniform Cards / Table View -->
+        <div class="products-grid" id="productsGrid">
+          <div class="loading-state">Loading uniform catalog...</div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- TAB 3: MASTER ORDERS & RELEASING -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <section id="sectionOrders" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Master Orders & Releasing Log</h1>
+            <p class="pane-subtitle">Monitor pickup claims, counter releases, and order items</p>
+          </div>
+          <div class="filter-group">
+            <select id="ordersStatusFilter">
+              <option value="All">All Statuses</option>
+              <option value="Pending">Pending Releasing</option>
+              <option value="Ready">Ready for Pickup</option>
+              <option value="Completed">Completed / Claimed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="orders-table-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Student</th>
+                <th>Department & Course</th>
+                <th>Items Ordered</th>
+                <th>Total</th>
+                <th>Pickup Schedule</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="masterOrdersTableBody">
+              <tr><td colspan="8" class="table-empty">Loading order records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- TAB 4: STUDENT DIRECTORY -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <section id="sectionStudents" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Student Directory</h1>
+            <p class="pane-subtitle">Students registered in the Olivarez Uniform Store mobile application</p>
+          </div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="studentSearchInput" placeholder="Filter by Student ID or Name...">
+          </div>
+        </div>
+
+        <div class="orders-table-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Department</th>
+                <th>Course / Strand</th>
+                <th>Year Level</th>
+                <th>Verification</th>
+                <th>Registered Date</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <tr><td colspan="8" class="table-empty">Loading student records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- TAB 5: STAFF ACCOUNTS & ROLES -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <section id="sectionStaff" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Store Staff & Cashier Accounts</h1>
+            <p class="pane-subtitle">Manage personnel authorized for the Counter Releasing Portal</p>
+          </div>
+          <button class="btn-primary" id="btnOpenAddStaffModal">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6"/></svg>
+            <span>Add Staff Account</span>
+          </button>
+        </div>
+
+        <div class="orders-table-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Role</th>
+                <th>Station</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <tr><td colspan="7" class="table-empty">Loading staff accounts...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: ADD / EDIT UNIFORM -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="productModalTitle">Add New Uniform</h2>
+          <p class="modal-subtitle">Specify course tagging, sizing, and uniform photograph</p>
+        </div>
+        <button class="modal-close-btn" id="btnProductModalClose">&times;</button>
+      </div>
+
+      <form id="productForm" class="modal-form">
+        <input type="hidden" id="prodFormId" value="0">
+
+        <!-- Image Upload Section -->
+        <div class="form-group full-width">
+          <label class="form-label">Uniform Photograph</label>
+          <div class="image-upload-container">
+            <div class="image-preview-box" id="imagePreviewBox">
+              <svg id="imagePlaceholderIcon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#888" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <img id="imagePreviewImg" src="" alt="Uniform Preview" style="display:none;">
+            </div>
+            <div class="image-upload-controls">
+              <input type="file" id="imageFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;">
+              <div class="upload-btn-row">
+                <button type="button" class="btn-secondary" id="btnSelectFile">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                  <span>Upload Local Photo</span>
+                </button>
+                <span class="upload-hint">PNG, JPG, or WEBP up to 10MB</span>
+              </div>
+              <div class="url-input-wrap">
+                <input type="text" id="prodImageUrl" placeholder="Or paste Image URL (e.g. http://localhost/olivarez_api/uploads/...)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name & Department -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="prodName">Uniform Name *</label>
+            <input type="text" id="prodName" required placeholder="e.g. BSN Clinical Duty Scrub Suit">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prodDept">Department *</label>
+            <select id="prodDept" required>
+              <option value="College">College (Higher Ed)</option>
+              <option value="Senior High">Senior High (SHS)</option>
+              <option value="Junior High">Junior High (JHS)</option>
+              <option value="Elementary">Elementary</option>
+              <option value="Kindergarten">Kindergarten</option>
+              <option value="All">All Departments (PE / Acc)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Course / Program & Category -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="prodCourse">Course / Program Tag *</label>
+            <select id="prodCourse" required>
+              <option value="All">All Courses / General</option>
+              <optgroup label="College Programs">
+                <option value="BSN">BSN (Bachelor of Science in Nursing)</option>
+                <option value="BSCrim">BSCrim (Criminology)</option>
+                <option value="BSHM">BSHM (Hospitality Management)</option>
+                <option value="BSTM">BSTM (Tourism Management)</option>
+                <option value="BSCA">BSCA (Customs Administration)</option>
+                <option value="BSRT">BSRT (Radiologic Technology)</option>
+                <option value="General College">General College (Polo/Barong/Blouse)</option>
+              </optgroup>
+              <optgroup label="Senior High Strands">
+                <option value="STEM">STEM (Science, Tech, Math)</option>
+                <option value="ABM">ABM (Accountancy, Business)</option>
+                <option value="HUMSS">HUMSS (Humanities & Social)</option>
+                <option value="TVL">TVL (Culinary / ICT / Home Ec)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodCategory">Category *</label>
+            <select id="prodCategory" required>
+              <option value="Tops">Tops (Blouse / Polo / Scrubs / Jacket)</option>
+              <option value="Bottoms">Bottoms (Pants / Skirt / Slacks)</option>
+              <option value="PE wear">PE wear (PE Shirt / Jogging Pants / Shorts)</option>
+              <option value="Accessories">Accessories (Lanyard / Tie / Patch / Cap)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Gender, Price, Stock -->
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label class="form-label" for="prodGender">Gender</label>
+            <select id="prodGender">
+              <option value="Unisex">Unisex</option>
+              <option value="Girls">Girls / Female</option>
+              <option value="Boys">Boys / Male</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prodPrice">Price (₱) *</label>
+            <input type="number" id="prodPrice" step="0.50" min="1" required placeholder="385.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prodStock">Initial Stock *</label>
+            <input type="number" id="prodStock" min="0" required placeholder="50">
+          </div>
+        </div>
+
+        <!-- Sizes & Description -->
+        <div class="form-group full-width">
+          <label class="form-label" for="prodSizes">Available Sizes (Comma-separated)</label>
+          <input type="text" id="prodSizes" value="XS, S, M, L, XL, 2XL" placeholder="e.g. XS, S, M, L, XL, 2XL or 24, 26, 28, 30">
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label" for="prodDescription">Description / Specifications</label>
+          <textarea id="prodDescription" rows="2" placeholder="Fabric material, official embroidery, school crest details..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelProductModal">Cancel</button>
+          <button type="submit" class="btn-primary" id="btnSaveProduct">
+            <span id="btnSaveProductText">Save Uniform</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: QUICK STOCK ADJUST -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="stockModal">
+    <div class="modal-dialog small">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Adjust Stock Level</h2>
+          <p class="modal-subtitle" id="stockModalSubtitle">Update inventory quantity</p>
+        </div>
+        <button class="modal-close-btn" id="btnStockModalClose">&times;</button>
+      </div>
+      <form id="stockForm" class="modal-form">
+        <input type="hidden" id="stockFormId" value="0">
+        <div class="form-group full-width">
+          <label class="form-label">Quantity to Add or Deduct</label>
+          <div class="quick-adjust-row">
+            <button type="button" class="stock-step-btn" data-step="-10">-10</button>
+            <button type="button" class="stock-step-btn" data-step="-5">-5</button>
+            <input type="number" id="stockAdjustAmount" value="20" required style="text-align:center; font-weight:700; font-size:16px;">
+            <button type="button" class="stock-step-btn" data-step="10">+10</button>
+            <button type="button" class="stock-step-btn" data-step="50">+50</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelStockModal">Cancel</button>
+          <button type="submit" class="btn-primary">Apply Stock Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: ADD STAFF ACCOUNT -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="staffModal">
+    <div class="modal-dialog small">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Add Store Personnel</h2>
+          <p class="modal-subtitle">Create login credentials for store counter & releasing</p>
+        </div>
+        <button class="modal-close-btn" id="btnStaffModalClose">&times;</button>
+      </div>
+      <form id="staffForm" class="modal-form">
+        <div class="form-group full-width">
+          <label class="form-label" for="staffUsername">Username *</label>
+          <input type="text" id="staffUsername" required placeholder="e.g. staff02">
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label" for="staffFullName">Full Name *</label>
+          <input type="text" id="staffFullName" required placeholder="e.g. Juan Dela Cruz">
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label" for="staffEmail">Email Address</label>
+          <input type="email" id="staffEmail" placeholder="e.g. juan@olivarezcollege.edu.ph">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="staffRole">Role</label>
+            <select id="staffRole">
+              <option value="Store Staff">Store Staff</option>
+              <option value="Cashier">Cashier</option>
+              <option value="Super Admin">Super Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="staffStation">Assigned Station</label>
+            <input type="text" id="staffStation" value="Counter 02" placeholder="Counter 01 / Main Office">
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label" for="staffPassword">Password</label>
+          <input type="password" id="staffPassword" value="Staff2026!" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelStaffModal">Cancel</button>
+          <button type="submit" class="btn-primary">Create Staff Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="adminToast" class="admin-toast">Notification message</div>
+
+  <script src="app.js"></script>
+</body>
+</html>

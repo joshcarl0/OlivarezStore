@@ -45,6 +45,10 @@ function sendError($message = "Error", $code = 400) {
 }
 
 function getInput() {
-    return json_decode(file_get_contents("php://input"), true) ?? [];
+    $raw = file_get_contents("php://input");
+    $raw = ltrim($raw, "\xEF\xBB\xBF");
+    $data = json_decode($raw, true);
+    if (!empty($data)) return $data;
+    return $_POST ?? [];
 }
 ?>

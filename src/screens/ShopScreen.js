@@ -110,6 +110,7 @@ export default function ShopScreen({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [genderFilter, setGenderFilter] = useState("Girls"); // Girls | Boys
   const [deptFilter, setDeptFilter] = useState("All");
+  const [courseFilter, setCourseFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState(
     initialCategory === "Uniforms" ? "All" : initialCategory || "All"
   );
@@ -141,6 +142,8 @@ export default function ShopScreen({ navigation, route }) {
               price: parseFloat(item.price) || 350.0,
               gender: item.gender || "All",
               department: item.department || "All",
+              course_strand: item.course_strand || "All",
+              image_url: item.image_url || null,
               imageType,
               sizes: parsedSizes,
             };
@@ -153,7 +156,7 @@ export default function ShopScreen({ navigation, route }) {
     })();
   }, []);
 
-  // Filter products based on Gender, Department, Category chip, and Search query
+  // Filter products based on Gender, Department, Course, Category chip, and Search query
   const filteredProducts = products.filter((item) => {
     // Gender check
     if (item.gender !== "All" && item.gender !== "Unisex" && item.gender !== genderFilter) {
@@ -161,6 +164,10 @@ export default function ShopScreen({ navigation, route }) {
     }
     // Department check
     if (deptFilter !== "All" && item.department !== "All" && item.department !== deptFilter) {
+      return false;
+    }
+    // Course check
+    if (courseFilter !== "All" && item.course_strand !== "All" && item.course_strand !== courseFilter) {
       return false;
     }
     // Category check
@@ -176,7 +183,8 @@ export default function ShopScreen({ navigation, route }) {
       const matchName = item.name.toLowerCase().includes(q);
       const matchCat = (item.category || "").toLowerCase().includes(q);
       const matchDept = (item.department || "").toLowerCase().includes(q);
-      if (!matchName && !matchCat && !matchDept) return false;
+      const matchCourse = (item.course_strand || "").toLowerCase().includes(q);
+      if (!matchName && !matchCat && !matchDept && !matchCourse) return false;
     }
     return true;
   });
@@ -192,20 +200,33 @@ export default function ShopScreen({ navigation, route }) {
             <Text style={styles.soldOutText}>Sold out</Text>
           </View>
         )}
-        <View style={styles.illustrationWrap}>
-          {item.imageType === "skirt" ? (
-            <MaterialCommunityIcons name="skirt" size={64} color="#f5f5f5" />
-          ) : item.imageType === "lace" ? (
-            <Ionicons name="ribbon-outline" size={58} color="#ffffff" />
-          ) : item.imageType === "tie" ? (
-            <MaterialCommunityIcons name="tie" size={58} color="#ffffff" />
-          ) : (
-            <View style={{ alignItems: "center" }}>
-              <MaterialCommunityIcons name="tshirt-v" size={64} color="#ffffff" />
-              {item.imageType === "blouse" && <View style={styles.miniTie} />}
-            </View>
-          )}
-        </View>
+        {item.course_strand && item.course_strand !== "All" && (
+          <View style={styles.cardCourseBadge}>
+            <Text style={styles.cardCourseBadgeText}>{item.course_strand}</Text>
+          </View>
+        )}
+        {item.image_url ? (
+          <Image
+            source={{ uri: item.image_url }}
+            style={styles.cardRealImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.illustrationWrap}>
+            {item.imageType === "skirt" ? (
+              <MaterialCommunityIcons name="skirt" size={64} color="#f5f5f5" />
+            ) : item.imageType === "lace" ? (
+              <Ionicons name="ribbon-outline" size={58} color="#ffffff" />
+            ) : item.imageType === "tie" ? (
+              <MaterialCommunityIcons name="tie" size={58} color="#ffffff" />
+            ) : (
+              <View style={{ alignItems: "center" }}>
+                <MaterialCommunityIcons name="tshirt-v" size={64} color="#ffffff" />
+                {item.imageType === "blouse" && <View style={styles.miniTie} />}
+              </View>
+            )}
+          </View>
+        )}
       </View>
     );
   };
@@ -238,7 +259,7 @@ export default function ShopScreen({ navigation, route }) {
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color="#999" style={styles.searchIcon} />
           <TextInput
-            placeholder="Search blouse, lace, PE shirts"
+            placeholder="Search blouse, lace, PE shirts, BSN..."
             placeholderTextColor="#999"
             style={styles.searchInput}
             value={searchQuery}
@@ -282,7 +303,10 @@ export default function ShopScreen({ navigation, route }) {
               <TouchableOpacity
                 key={d}
                 style={[styles.deptChip, isActive && styles.deptChipActive]}
-                onPress={() => setDeptFilter(d)}
+                onPress={() => {
+                  setDeptFilter(d);
+                  if (d !== "College") setCourseFilter("All");
+                }}
               >
                 <Text style={[styles.deptChipText, isActive && styles.deptChipTextActive]}>
                   {d === "All" ? "All Depts" : d}
@@ -292,6 +316,37 @@ export default function ShopScreen({ navigation, route }) {
           })}
         </ScrollView>
       </View>
+
+      {/* ── COLLEGE COURSE CHIPS (Nursing, Criminology, Tourism, etc.) ── */}
+      {deptFilter === "College" && (
+        <View style={{ marginBottom: 10 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}>
+            {[
+              { id: "All", label: "All Courses" },
+              { id: "BSN", label: "BSN (Nursing)" },
+              { id: "BSCrim", label: "BSCrim (Criminology)" },
+              { id: "BSHM", label: "BSHM (Hospitality)" },
+              { id: "BSTM", label: "BSTM (Tourism)" },
+              { id: "BSCA", label: "BSCA (Customs)" },
+              { id: "BSRT", label: "BSRT (RadTech)" },
+              { id: "General College", label: "General College" },
+            ].map((c) => {
+              const isActive = courseFilter === c.id;
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  style={[styles.courseChip, isActive && styles.courseChipActive]}
+                  onPress={() => setCourseFilter(c.id)}
+                >
+                  <Text style={[styles.courseChipText, isActive && styles.courseChipTextActive]}>
+                    {c.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       {/* ── CATEGORY CHIPS (All, Tops, Bottoms, PE wear, Accessories) ── */}
       <View style={styles.categoryRow}>
@@ -571,5 +626,51 @@ const styles = StyleSheet.create({
   deptChipTextActive: {
     color: OC_GREEN,
     fontWeight: "700",
+  },
+  cardRealImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  productRealImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  cardCourseBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(10, 35, 18, 0.85)",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    zIndex: 2,
+  },
+  cardCourseBadgeText: {
+    color: "#ffffff",
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  courseChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+    borderRadius: 10,
+    backgroundColor: "#f4f6f8",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  courseChipActive: {
+    backgroundColor: "#0e3d1c",
+    borderColor: "#0e3d1c",
+  },
+  courseChipText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#4b5563",
+  },
+  courseChipTextActive: {
+    color: "#ffffff",
+    fontWeight: "800",
   },
 });

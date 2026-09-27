@@ -6,13 +6,20 @@ $db = getDB();
 $dept = trim($_GET["department"] ?? "");
 $search = trim($_GET["search"] ?? "");
 
-$sql = "SELECT id, name, category, department, gender, price, stock, is_active FROM products WHERE is_active = 1";
+$sql = "SELECT id, name, description, category, department, course_strand, gender, price, stock, image_url, sizes, is_active FROM products WHERE is_active = 1";
 $params = [];
 $types = "";
 
+$course = trim($_GET["course"] ?? "");
 if (!empty($dept) && $dept !== "All") {
     $sql .= " AND department = ?";
     $params[] = $dept;
+    $types .= "s";
+}
+
+if (!empty($course) && $course !== "All") {
+    $sql .= " AND (course_strand = ? OR course_strand = 'All')";
+    $params[] = $course;
     $types .= "s";
 }
 
