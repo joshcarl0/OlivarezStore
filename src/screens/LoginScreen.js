@@ -99,8 +99,12 @@ export default function LoginScreen({ navigation }) {
         await AsyncStorage.setItem("auth_token",   res.data.token);
         await AsyncStorage.setItem("student_info", JSON.stringify(res.data.student));
         await touchSession(); // start idle-timeout tracking
-        setAttemptsLeft(MAX_LOGIN_ATTEMPTS);
-        navigation.replace("Home");
+        const role = res.data?.role || res.data?.student?.role;
+        if (role === "Store Staff" || role === "Super Admin") {
+          navigation.replace("StaffDashboard");
+        } else {
+          navigation.replace("Home");
+        }
       } else {
         // ── Failed login: record attempt & update UI ──────────────
         const { lockedOut, attempts } = await recordFailedAttempt();

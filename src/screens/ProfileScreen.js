@@ -73,24 +73,42 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Saved Sizes Section */}
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>Registered Uniform Sizes</Text>
-          <View style={styles.sizesRow}>
-            <View style={styles.sizeBox}>
-              <Text style={styles.sizeLabel}>Blouse</Text>
-              <Text style={styles.sizeVal}>{student?.size_blouse || "M"}</Text>
+        {/* Staff / Admin Access Card */}
+        {(student?.role === "Store Staff" || student?.role === "Super Admin") ? (
+          <TouchableOpacity
+            style={styles.staffAccessBtn}
+            onPress={() => navigation.navigate("StaffDashboard")}
+            activeOpacity={0.85}
+          >
+            <View style={styles.staffAccessIconBox}>
+              <Ionicons name="scan" size={24} color="#ffffff" />
             </View>
-            <View style={styles.sizeBox}>
-              <Text style={styles.sizeLabel}>Skirt</Text>
-              <Text style={styles.sizeVal}>{student?.size_skirt || "M"}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.staffAccessTitle}>Store Releasing Counter</Text>
+              <Text style={styles.staffAccessSub}>Open QR Lookup, Orders Queue & Stocks</Text>
             </View>
-            <View style={styles.sizeBox}>
-              <Text style={styles.sizeLabel}>PE Shirt</Text>
-              <Text style={styles.sizeVal}>{student?.size_pe_shirt || "L"}</Text>
+            <Ionicons name="chevron-forward" size={20} color={OC_GREEN} />
+          </TouchableOpacity>
+        ) : (
+          /* Saved Sizes Section */
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Registered Uniform Sizes</Text>
+            <View style={styles.sizesRow}>
+              <View style={styles.sizeBox}>
+                <Text style={styles.sizeLabel}>Blouse</Text>
+                <Text style={styles.sizeVal}>{student?.size_blouse || "M"}</Text>
+              </View>
+              <View style={styles.sizeBox}>
+                <Text style={styles.sizeLabel}>Skirt</Text>
+                <Text style={styles.sizeVal}>{student?.size_skirt || "M"}</Text>
+              </View>
+              <View style={styles.sizeBox}>
+                <Text style={styles.sizeLabel}>PE Shirt</Text>
+                <Text style={styles.sizeVal}>{student?.size_pe_shirt || "L"}</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         {/* Actions */}
         <View style={styles.actionSection}>
@@ -267,5 +285,37 @@ const styles = StyleSheet.create({
     color: "#dc3545",
     fontSize: 15,
     fontWeight: "700",
+    marginLeft: 8,
+  },
+  staffAccessBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ecfdf5",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: "#a7f3d0",
+    marginBottom: 20,
+    elevation: 2,
+  },
+  staffAccessIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: OC_GREEN,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  staffAccessTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#111",
+  },
+  staffAccessSub: {
+    fontSize: 12,
+    color: "#059669",
+    marginTop: 2,
+    fontWeight: "600",
   },
 });

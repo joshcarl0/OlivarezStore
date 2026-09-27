@@ -15,9 +15,11 @@ import CheckoutScreen from "./src/screens/CheckoutScreen";
 import OrderSuccessScreen from "./src/screens/OrderSuccessScreen";
 import OrdersScreen from "./src/screens/OrdersScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import StaffDashboardScreen from "./src/screens/StaffDashboardScreen";
 
 import { CartProvider } from "./src/context/CartContext";
 import { isAuthenticated, isSessionExpired, secureLogout } from "./src/utils/security";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,7 +37,13 @@ export default function App() {
             await secureLogout();
             setInitialRoute("Login");
           } else {
-            setInitialRoute("Home");
+            const studentInfoStr = await AsyncStorage.getItem("student_info");
+            const studentInfo = studentInfoStr ? JSON.parse(studentInfoStr) : null;
+            if (studentInfo?.role === "Store Staff" || studentInfo?.role === "Super Admin") {
+              setInitialRoute("StaffDashboard");
+            } else {
+              setInitialRoute("Home");
+            }
           }
         } else {
           setInitialRoute("Login");
@@ -76,6 +84,7 @@ export default function App() {
             <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
             <Stack.Screen name="Orders" component={OrdersScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="StaffDashboard" component={StaffDashboardScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>
