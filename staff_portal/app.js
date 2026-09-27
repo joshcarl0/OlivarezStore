@@ -1,5 +1,5 @@
 // app.js - Store Staff & Cashier Portal Logic
-const API_BASE = "http://localhost/olivarez_api";
+const API_BASE = window.location.origin + "/olivarez_api";
 
 // State
 let allOrders = [];
