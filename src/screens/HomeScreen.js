@@ -10,7 +10,7 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import {
@@ -27,6 +27,7 @@ const OC_GOLD = "#f5a623";
 const OC_LIGHT_BG = "#f8f9fa";
 
 export default function HomeScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { cart, orders, totalCount } = useCart();
   const [student, setStudent] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -150,7 +151,7 @@ export default function HomeScreen({ navigation }) {
       {/* ── MAIN SCROLLABLE CONTENT ── */}
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── GREETING SECTION ── */}
@@ -298,53 +299,65 @@ export default function HomeScreen({ navigation }) {
       </ScrollView>
 
       {/* ── BOTTOM NAVIGATION BAR ── */}
-      <View style={styles.bottomNav}>
+      <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         {/* Home */}
         <TouchableOpacity
           style={styles.navItem}
+          hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
           onPress={() => setActiveTab("home")}
+          activeOpacity={0.7}
         >
           <Ionicons
             name={activeTab === "home" ? "home" : "home-outline"}
             size={24}
-            color={activeTab === "home" ? OC_GREEN : "#777"}
+            color={activeTab === "home" ? OC_GREEN : "#888"}
           />
+          <Text style={[styles.navItemText, activeTab === "home" && styles.navItemTextActive]}>Home</Text>
         </TouchableOpacity>
 
         {/* Shop */}
         <TouchableOpacity
           style={styles.navItem}
+          hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
           onPress={() => navigation.navigate("Shop")}
+          activeOpacity={0.7}
         >
           <Feather
             name="shopping-bag"
             size={22}
-            color={activeTab === "shop" ? OC_GREEN : "#777"}
+            color={activeTab === "shop" ? OC_GREEN : "#888"}
           />
+          <Text style={[styles.navItemText, activeTab === "shop" && styles.navItemTextActive]}>Shop</Text>
         </TouchableOpacity>
 
         {/* Orders / Activity */}
         <TouchableOpacity
           style={styles.navItem}
+          hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
           onPress={() => navigation.navigate("Orders")}
+          activeOpacity={0.7}
         >
           <Ionicons
             name={activeTab === "orders" ? "receipt" : "receipt-outline"}
             size={22}
-            color={activeTab === "orders" ? OC_GREEN : "#777"}
+            color={activeTab === "orders" ? OC_GREEN : "#888"}
           />
+          <Text style={[styles.navItemText, activeTab === "orders" && styles.navItemTextActive]}>Orders</Text>
         </TouchableOpacity>
 
         {/* Profile */}
         <TouchableOpacity
           style={styles.navItem}
+          hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
           onPress={() => navigation.navigate("Profile")}
+          activeOpacity={0.7}
         >
           <Ionicons
             name={activeTab === "profile" ? "person" : "person-outline"}
             size={22}
-            color={activeTab === "profile" ? OC_GREEN : "#777"}
+            color={activeTab === "profile" ? OC_GREEN : "#888"}
           />
+          <Text style={[styles.navItemText, activeTab === "profile" && styles.navItemTextActive]}>Profile</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -664,17 +677,34 @@ const styles = StyleSheet.create({
   // ── BOTTOM NAV ──
   bottomNav: {
     flexDirection: "row",
-    height: 60,
     backgroundColor: "#ffffff",
-    borderTopWidth: 1,
+    borderTopWidth: 1.5,
     borderTopColor: "#edf0f2",
     alignItems: "center",
     justifyContent: "space-around",
     paddingHorizontal: 10,
+    paddingTop: 8,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: -2 },
+    shadowRadius: 6,
   },
   navItem: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 14,
+    minWidth: 64,
+  },
+  navItemText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#888",
+    marginTop: 2,
+  },
+  navItemTextActive: {
+    color: OC_GREEN,
+    fontWeight: "800",
   },
 });
