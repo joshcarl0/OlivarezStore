@@ -14,16 +14,16 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 $db = getDB();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $input = json_decode(file_get_contents("php://input"), true) ?? $_POST;
+    $input = getInput();
     $action = $input["action"] ?? "create_staff";
 
-    if ($action === "create_staff") {
+    if ($action === "create_staff" || $action === "create_admin") {
         $username = trim($input["username"] ?? "");
         $full_name = trim($input["full_name"] ?? $input["name"] ?? "");
         $email = trim($input["email"] ?? "");
-        $role = trim($input["role"] ?? "Store Staff");
-        $station = trim($input["station"] ?? "Counter 01");
-        $password = $input["password"] ?? "Staff2026!";
+        $role = trim($input["role"] ?? ($action === "create_admin" ? "Super Admin" : "Store Staff"));
+        $station = trim($input["station"] ?? ($role === "Super Admin" ? "Main Office" : "Counter 01"));
+        $password = $input["password"] ?? ($role === "Super Admin" ? "Admin2026!" : "Staff2026!");
 
         if (empty($username) || empty($full_name)) {
             sendError("Username and full name are required.");
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $check->bind_param("s", $username);
         $check->execute();
         if ($check->get_result()->num_rows > 0) {
-            sendError("Username '{$username}' is already taken.");
+            sendError("Username '{$username}' is already taken. Please choose another username.");
         }
 
         $hash = password_hash($password, PASSWORD_BCRYPT);
@@ -47,9 +47,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("ssssss", $username, $full_name, $email, $hash, $role, $station);
 
         if ($stmt->execute()) {
-            sendSuccess(["id" => $db->insert_id, "username" => $username], "Staff user created successfully");
+            sendSuccess(["id" => $db->insert_id, "username" => $username, "role" => $role], "{$role} account created successfully!");
         } else {
-            sendError("Failed to create staff account: " . $stmt->error);
+            sendError("Failed to create account: " . $stmt->error);
+        }
+    } elseif ($action === "toggle_active") {
+        $id = intval($input["id"] ?? 0);
+        $active = intval($input["is_active"] ?? 1);
+        $stmt = $db->prepare("UPDATE staff_users SET is_active = ? WHERE id = ?");
+        $stmt->bind_param("ii", $active, $id);
+        if ($stmt->execute()) {
+            sendSuccess(["id" => $id, "is_active" => $active], "Account status updated.");
+        } else {
+            sendError("Failed to update status: " . $stmt->error);
+        }
+    } elseif ($action === "delete_staff") {
+        $id = intval($input["id"] ?? 0);
+        // Prevent deleting original admin ID 2
+        if ($id <= 2) {
+            sendError("Default system accounts cannot be deleted.");
+        }
+        $stmt = $db->prepare("DELETE FROM staff_users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute()) {
+            sendSuccess(["id" => $id], "Account removed.");
+        } else {
+            sendError("Failed to delete account: " . $stmt->error);
         }
     } else {
         sendError("Unsupported action");

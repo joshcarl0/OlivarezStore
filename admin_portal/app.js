@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupProductModal();
   setupStockModal();
   setupStaffModal();
+  setupStaffFilters();
+  setupLoginModal();
   setupImageUploader();
 
   // Load initial data
@@ -747,43 +749,140 @@ function renderStudentsTable() {
     .join("");
 }
 
+function setupStaffFilters() {
+  document.getElementById("staffRoleFilter")?.addEventListener("change", renderStaffTable);
+}
+
 function renderStaffTable() {
   const tbody = document.getElementById("staffTableBody");
   if (!tbody) return;
 
-  if (allStaff.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No staff accounts registered.</td></tr>`;
+  const roleFilter = document.getElementById("staffRoleFilter")?.value || "All";
+  const filtered = allStaff.filter((st) => (roleFilter === "All" ? true : st.role === roleFilter));
+
+  const countPill = document.getElementById("staffCountPill");
+  if (countPill) countPill.textContent = `Showing ${filtered.length} of ${allStaff.length} accounts`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="table-empty">No accounts found for "${roleFilter}".</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = allStaff
+  tbody.innerHTML = filtered
     .map((st) => {
-      const activeBadge = st.is_active == 1 ? `<span class="meta-tag green">Active</span>` : `<span class="meta-tag red">Disabled</span>`;
+      const isSuperAdmin = st.role === "Super Admin";
+      const roleBadge = isSuperAdmin
+        ? `<span class="badge-dept" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-weight:800;">👑 Super Admin</span>`
+        : `<span class="badge-dept">${escapeHtml(st.role)}</span>`;
+
+      const activeBadge = st.is_active == 1
+        ? `<span class="meta-tag green">Active</span>`
+        : `<span class="meta-tag red">Disabled</span>`;
+
+      const isRoot = parseInt(st.id) <= 2;
+      const actionHtml = isRoot
+        ? `<span style="font-size:11px; color:var(--slate-400); font-weight:600;">System Protected</span>`
+        : `
+          <div style="display:flex; gap:6px;">
+            <button class="btn-action-stock" style="padding:4px 8px; font-size:11px;" onclick="toggleStaffActive(${st.id}, ${st.is_active == 1 ? 0 : 1})">
+              ${st.is_active == 1 ? "Disable" : "Enable"}
+            </button>
+            <button class="btn-action-del" style="padding:4px 8px; font-size:11px;" onclick="deleteStaffAccount(${st.id}, '${escapeHtml(st.username)}')">
+              🗑️
+            </button>
+          </div>
+        `;
+
       return `
       <tr>
-        <td><strong style="color:var(--oc-green-700);">${escapeHtml(st.username)}</strong></td>
-        <td>${escapeHtml(st.full_name)}</td>
+        <td><strong style="color:var(--oc-green-700); font-family:monospace; font-size:13px;">${escapeHtml(st.username)}</strong></td>
+        <td><strong>${escapeHtml(st.full_name)}</strong></td>
         <td>${escapeHtml(st.email || "—")}</td>
-        <td><span class="badge-dept">${escapeHtml(st.role)}</span></td>
+        <td>${roleBadge}</td>
         <td>${escapeHtml(st.station || "Counter 01")}</td>
         <td>${activeBadge}</td>
-        <td>${escapeHtml(st.created_at || "—")}</td>
+        <td style="font-size:11px; color:var(--slate-500);">${escapeHtml(st.created_at || "—")}</td>
+        <td>${actionHtml}</td>
       </tr>
     `;
     })
     .join("");
 }
 
-/* ── MODAL: ADD STAFF ACCOUNT ── */
+/* ── MODAL: ADD ADMIN / STAFF ACCOUNT ── */
 function setupStaffModal() {
   const modal = document.getElementById("staffModal");
-  const btnOpen = document.getElementById("btnOpenAddStaffModal");
+  const btnOpenAdmin = document.getElementById("btnOpenAddAdminModal");
+  const btnOpenStaff = document.getElementById("btnOpenAddStaffModal");
   const btnClose = document.getElementById("btnStaffModalClose");
   const btnCancel = document.getElementById("btnCancelStaffModal");
   const form = document.getElementById("staffForm");
+  const roleSelect = document.getElementById("staffRole");
+  const stationInput = document.getElementById("staffStation");
+  const passwordInput = document.getElementById("staffPassword");
+  const passwordHint = document.getElementById("staffPasswordHint");
+  const roleHintBox = document.getElementById("roleHintBox");
+  const modalTitle = document.getElementById("staffModalTitle");
+  const modalSubtitle = document.getElementById("staffModalSubtitle");
+  const submitText = document.getElementById("btnStaffSubmitText");
 
-  btnOpen?.addEventListener("click", () => {
+  const updateRoleUI = (role) => {
+    if (role === "Super Admin") {
+      stationInput.value = "Main Admin Office";
+      passwordInput.value = "Admin2026!";
+      if (passwordHint) passwordHint.textContent = "Default for Admin: Admin2026! (Bcrypt encrypted)";
+      if (roleHintBox) {
+        roleHintBox.style.background = "#fef3c7";
+        roleHintBox.style.borderColor = "#fde68a";
+        roleHintBox.style.color = "#92400e";
+        roleHintBox.innerHTML = `👑 <strong>Super Admin</strong>: May full access sa sales revenue, add/edit/delete ng uniforms at mga kurso, photo uploads, at pamamahala ng mga accounts.`;
+      }
+    } else if (role === "Cashier") {
+      stationInput.value = "Counter 01";
+      passwordInput.value = "Staff2026!";
+      if (passwordHint) passwordHint.textContent = "Default for Cashier: Staff2026! (Bcrypt encrypted)";
+      if (roleHintBox) {
+        roleHintBox.style.background = "#eff6ff";
+        roleHintBox.style.borderColor = "#bfdbfe";
+        roleHintBox.style.color = "#1e40af";
+        roleHintBox.innerHTML = `💳 <strong>Cashier</strong>: May access sa Counter POS screen, pagkuha ng bayad, at automated change calculator.`;
+      }
+    } else {
+      stationInput.value = "Counter 01";
+      passwordInput.value = "Staff2026!";
+      if (passwordHint) passwordHint.textContent = "Default for Staff: Staff2026! (Bcrypt encrypted)";
+      if (roleHintBox) {
+        roleHintBox.style.background = "#f0fdf4";
+        roleHintBox.style.borderColor = "#bbf7d0";
+        roleHintBox.style.color = "#14532d";
+        roleHintBox.innerHTML = `🏪 <strong>Store Staff</strong>: May access sa Counter Releasing Portal at Mobile Scanner app para mag-scan ng QR code at mag-release ng uniforms.`;
+      }
+    }
+  };
+
+  roleSelect?.addEventListener("change", (e) => {
+    updateRoleUI(e.target.value);
+  });
+
+  // Open for Super Admin
+  btnOpenAdmin?.addEventListener("click", () => {
     form?.reset();
+    if (modalTitle) modalTitle.textContent = "Add Administrator Account";
+    if (modalSubtitle) modalSubtitle.textContent = "Create an account with full Super Admin privileges";
+    if (submitText) submitText.textContent = "Create Administrator";
+    if (roleSelect) roleSelect.value = "Super Admin";
+    updateRoleUI("Super Admin");
+    modal?.classList.add("active");
+  });
+
+  // Open for Store Staff
+  btnOpenStaff?.addEventListener("click", () => {
+    form?.reset();
+    if (modalTitle) modalTitle.textContent = "Add Store Personnel Account";
+    if (modalSubtitle) modalSubtitle.textContent = "Create login credentials for store counter & releasing";
+    if (submitText) submitText.textContent = "Create Staff Account";
+    if (roleSelect) roleSelect.value = "Store Staff";
+    updateRoleUI("Store Staff");
     modal?.classList.add("active");
   });
 
@@ -794,12 +893,13 @@ function setupStaffModal() {
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const role = document.getElementById("staffRole").value;
     const payload = {
-      action: "create_staff",
+      action: role === "Super Admin" ? "create_admin" : "create_staff",
       username: document.getElementById("staffUsername").value.trim(),
       full_name: document.getElementById("staffFullName").value.trim(),
       email: document.getElementById("staffEmail").value.trim(),
-      role: document.getElementById("staffRole").value,
+      role: role,
       station: document.getElementById("staffStation").value.trim(),
       password: document.getElementById("staffPassword").value,
     };
@@ -812,16 +912,134 @@ function setupStaffModal() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast("New staff account created successfully!");
+        showToast(`${role} account created successfully! Username: ${payload.username}`);
         closeModal();
         loadUsers();
+        loadAnalytics();
       } else {
-        alert("Failed to create staff: " + (data.message || "Unknown error"));
+        alert("Failed to create account: " + (data.message || "Unknown error"));
       }
     } catch (err) {
-      console.error("Create staff error:", err);
+      console.error("Create account error:", err);
+      alert("Error communicating with server.");
     }
   });
+}
+
+window.toggleStaffActive = async function (id, newActive) {
+  try {
+    const res = await fetch(`${API_BASE}/get_users.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "toggle_active", id, is_active: newActive }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(newActive == 1 ? "Account activated." : "Account deactivated.");
+      loadUsers();
+    } else {
+      alert("Failed to update status: " + (data.message || "Unknown error"));
+    }
+  } catch (err) {
+    console.error("Toggle error:", err);
+  }
+};
+
+window.deleteStaffAccount = async function (id, username) {
+  if (!confirm(`Are you sure you want to permanently delete account "${username}"?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/get_users.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "delete_staff", id }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Account "${username}" removed.`);
+      loadUsers();
+      loadAnalytics();
+    } else {
+      alert("Failed to delete account: " + (data.message || "Unknown error"));
+    }
+  } catch (err) {
+    console.error("Delete staff error:", err);
+  }
+};
+
+/* ── MODAL: SWITCH / LOGIN ACCOUNT ── */
+function setupLoginModal() {
+  const modal = document.getElementById("loginModal");
+  const userPill = document.getElementById("adminUserPill");
+  const btnSwitch = document.getElementById("btnSwitchAccount");
+  const btnClose = document.getElementById("btnLoginModalClose");
+  const btnCancel = document.getElementById("btnCancelLoginModal");
+  const form = document.getElementById("adminLoginForm");
+
+  // Load saved session or set default
+  const saved = localStorage.getItem("oc_current_admin");
+  if (saved) {
+    try {
+      const user = JSON.parse(saved);
+      updateCurrentAdminUI(user);
+    } catch {}
+  }
+
+  const openModal = () => {
+    form?.reset();
+    modal?.classList.add("active");
+  };
+
+  const closeModal = () => modal?.classList.remove("active");
+
+  userPill?.addEventListener("click", openModal);
+  btnSwitch?.addEventListener("click", openModal);
+  btnClose?.addEventListener("click", closeModal);
+  btnCancel?.addEventListener("click", closeModal);
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const identifier = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    try {
+      const res = await fetch(`${API_BASE}/login.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.user) {
+        const user = data.data.user;
+        localStorage.setItem("oc_current_admin", JSON.stringify(user));
+        updateCurrentAdminUI(user);
+        showToast(`Welcome, ${user.name || user.username}! Logged in as ${user.role || "Staff"}.`);
+        closeModal();
+      } else {
+        alert("Login failed: " + (data.message || "Invalid credentials"));
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Error connecting to login API.");
+    }
+  });
+}
+
+function updateCurrentAdminUI(user) {
+  const nameEl = document.getElementById("currentAdminName");
+  const roleEl = document.getElementById("currentAdminRole");
+  const avatarEl = document.getElementById("currentAdminAvatar");
+
+  if (nameEl) nameEl.textContent = user.name || user.full_name || user.username || "Administrator";
+  if (roleEl) roleEl.textContent = user.role || "Super Admin";
+  if (avatarEl) {
+    const rawName = user.name || user.full_name || user.username || "AD";
+    const parts = rawName.split(" ").filter(Boolean);
+    const initials = parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : rawName.substring(0, 2).toUpperCase();
+    avatarEl.textContent = initials;
+  }
 }
 
 function escapeHtml(str) {
