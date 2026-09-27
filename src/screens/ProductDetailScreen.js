@@ -86,7 +86,7 @@ export default function ProductDetailScreen({ navigation, route }) {
           ) : (
             <View style={styles.heroIllustration}>
               {product.imageType === "skirt" ? (
-                <MaterialCommunityIcons name="skirt" size={130} color="#2b5937" />
+                <MaterialCommunityIcons name="hanger" size={130} color="#2b5937" />
               ) : product.imageType === "lace" ? (
                 <Ionicons name="ribbon-outline" size={120} color="#2b5937" />
               ) : product.imageType === "tie" ? (

@@ -72,7 +72,7 @@ export default function CartScreen({ navigation }) {
                   {/* Thumbnail */}
                   <View style={styles.thumbnailBox}>
                     {item.category?.toLowerCase().includes("skirt") ? (
-                      <MaterialCommunityIcons name="skirt" size={32} color={OC_GREEN} />
+                      <MaterialCommunityIcons name="hanger" size={32} color={OC_GREEN} />
                     ) : item.name?.toLowerCase().includes("lace") ? (
                       <Ionicons name="ribbon-outline" size={30} color={OC_GREEN} />
                     ) : item.name?.toLowerCase().includes("tie") ? (

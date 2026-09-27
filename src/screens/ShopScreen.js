@@ -214,7 +214,7 @@ export default function ShopScreen({ navigation, route }) {
         ) : (
           <View style={styles.illustrationWrap}>
             {item.imageType === "skirt" ? (
-              <MaterialCommunityIcons name="skirt" size={64} color="#f5f5f5" />
+              <MaterialCommunityIcons name="hanger" size={64} color="#f5f5f5" />
             ) : item.imageType === "lace" ? (
               <Ionicons name="ribbon-outline" size={58} color="#ffffff" />
             ) : item.imageType === "tie" ? (
