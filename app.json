@@ -1,24 +1,24 @@
 {
   "expo": {
-    "name": "olivarez-store",
+    "name": "Olivarian Store Supply",
     "slug": "olivarez-store",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/OC-LOGO.png",
     "userInterfaceStyle": "light",
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/OC-LOGO.png",
+        "backgroundColor": "#1a5c2e"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/OC-LOGO.png",
+      "bundler": "metro"
     }
   }
 }
