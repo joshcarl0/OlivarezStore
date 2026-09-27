@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olivarez College — Student Uniform Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="student-topbar">
+    <div class="topbar-container">
+      <a href="/" class="topbar-brand">
+        <div class="brand-crest">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="#f5a623" stroke="#f5a623"/>
+            <path d="M12 6v12M8 12h8" stroke="#0a2312" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">OLIVAREZ COLLEGE</div>
+          <div class="brand-sub">STUDENT UNIFORM PORTAL</div>
+        </div>
+      </a>
+
+      <!-- Right Side User Info or Back to Hub -->
+      <div class="topbar-right">
+        <div id="guestNav" class="guest-nav">
+          <a href="/" class="btn-text">← Back to Hub</a>
+        </div>
+        <div id="userNav" class="user-nav" style="display:none;">
+          <div class="student-pill">
+            <div class="student-avatar" id="studentAvatar">ST</div>
+            <div class="student-meta">
+              <div class="student-name" id="studentName">Student Name</div>
+              <div class="student-dept-tag" id="studentDeptTag">BSN • College</div>
+            </div>
+          </div>
+          <button class="btn-logout" id="btnLogout">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- VIEW 1: AUTH VIEW (LOGIN & REGISTRATION) -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <section id="authSection" class="auth-section">
+      <div class="auth-card">
+        
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tabBtnLogin">Student Sign In</button>
+          <button class="auth-tab-btn" id="tabBtnRegister">Create Account</button>
+        </div>
+
+        <!-- ── SUB-VIEW: LOGIN FORM ── -->
+        <div id="loginFormPane" class="auth-pane active">
+          <div class="auth-header">
+            <h2 class="auth-title">Welcome, Olivarian!</h2>
+            <p class="auth-desc">Sign in with your Student ID or institutional Olivarez email</p>
+          </div>
+
+          <form id="studentLoginForm" class="form-body">
+            <div class="form-group">
+              <label class="form-label" for="loginIdentifier">Student ID or Email</label>
+              <div class="input-icon-wrap">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="loginIdentifier" placeholder="e.g. 232C-0018 or joshcarl.fernan" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="loginPassword">Password</label>
+              <div class="input-icon-wrap">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btnLoginSubmit">
+              <span>Sign In to Student Portal</span>
+            </button>
+
+            <!-- Quick Demo Credential Pills -->
+            <div class="demo-box">
+              <span class="demo-title">Quick Demo Login:</span>
+              <div class="demo-chips">
+                <button type="button" class="demo-chip" onclick="fillDemo('232C-0018', 'Olivarez2026!')">
+                  🎓 Josh Carl (College 232C-0018)
+                </button>
+                <button type="button" class="demo-chip" onclick="fillDemo('231S-0042', 'Olivarez2026!')">
+                  🧪 Maria Santos (SHS STEM)
+                </button>
+              </div>
+            </div>
+
+            <div class="auth-switch-text">
+              Don't have an account yet? 
+              <a href="javascript:void(0)" onclick="switchToRegister()">Create Student Account</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- ── SUB-VIEW: REGISTRATION FORM (CREATE ACCOUNT) ── -->
+        <div id="registerFormPane" class="auth-pane">
+          <div class="auth-header">
+            <h2 class="auth-title">Create Student Account</h2>
+            <p class="auth-desc">Register with your official student information</p>
+          </div>
+
+          <!-- Wizard Step Indicator -->
+          <div class="steps-progress">
+            <div class="step-bubble active" id="bubbleStep1">1. Student Info</div>
+            <div class="step-connector"></div>
+            <div class="step-bubble" id="bubbleStep2">2. Course & Sizing</div>
+            <div class="step-connector"></div>
+            <div class="step-bubble" id="bubbleStep3">3. Verification</div>
+          </div>
+
+          <!-- Step 1: Personal Credentials -->
+          <div id="regStep1" class="reg-step-box active">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regStudentId">Student ID Number *</label>
+                <input type="text" id="regStudentId" placeholder="e.g. 232C-0019" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regMobile">Mobile Number *</label>
+                <input type="tel" id="regMobile" placeholder="09171234567" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regFirstName">First Name *</label>
+                <input type="text" id="regFirstName" placeholder="e.g. John" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regLastName">Last Name *</label>
+                <input type="text" id="regLastName" placeholder="e.g. Santos" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regEmail">Email Address (for Verification OTP) *</label>
+              <input type="email" id="regEmail" placeholder="e.g. yourname@olivarezcollege.edu.ph" required>
+              <span class="field-hint">A real 6-digit OTP code will be dispatched to this email.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regPassword">Create Password (Min 8 chars) *</label>
+              <input type="password" id="regPassword" placeholder="Enter strong password" required>
+            </div>
+
+            <button type="button" class="btn-submit" id="btnNextStep1">
+              <span>Next: Course & Sizing →</span>
+            </button>
+          </div>
+
+          <!-- Step 2: Department, Course, Gender, Sizes -->
+          <div id="regStep2" class="reg-step-box">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regDept">Department *</label>
+                <select id="regDept">
+                  <option value="College">College (Higher Education)</option>
+                  <option value="Senior High">Senior High School (SHS)</option>
+                  <option value="Junior High">Junior High School (JHS)</option>
+                  <option value="Elementary">Elementary</option>
+                  <option value="Kindergarten">Kindergarten</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regCourse">Enrolled Course / Strand *</label>
+                <select id="regCourse">
+                  <optgroup label="College Programs">
+                    <option value="BSN">BSN (Nursing)</option>
+                    <option value="BSCrim">BSCrim (Criminology)</option>
+                    <option value="BSHM">BSHM (Hospitality Management)</option>
+                    <option value="BSTM">BSTM (Tourism Management)</option>
+                    <option value="BSCA">BSCA (Customs Administration)</option>
+                    <option value="BSRT">BSRT (Radiologic Technology)</option>
+                    <option value="BSIT">BSIT (Information Technology)</option>
+                    <option value="BSCS">BSCS (Computer Science)</option>
+                    <option value="BSBA">BSBA (Business Administration)</option>
+                    <option value="BSEd">BSEd (Education)</option>
+                    <option value="General College">General College</option>
+                  </optgroup>
+                  <optgroup label="Senior High Strands">
+                    <option value="STEM">STEM (Science & Tech)</option>
+                    <option value="ABM">ABM (Accountancy & Business)</option>
+                    <option value="HUMSS">HUMSS (Humanities)</option>
+                    <option value="TVL">TVL (Culinary / ICT)</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regGender">Gender</label>
+                <select id="regGender">
+                  <option value="Girls">Girls / Female</option>
+                  <option value="Boys">Boys / Male</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regYearLevel">Year Level</label>
+                <select id="regYearLevel">
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                  <option value="Grade 11">Grade 11</option>
+                  <option value="Grade 12">Grade 12</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Approximate Uniform Size</label>
+              <div class="size-btn-group">
+                <button type="button" class="size-choice-btn" data-size="S">S</button>
+                <button type="button" class="size-choice-btn active" data-size="M">M</button>
+                <button type="button" class="size-choice-btn" data-size="L">L</button>
+                <button type="button" class="size-choice-btn" data-size="XL">XL</button>
+                <button type="button" class="size-choice-btn" data-size="2XL">2XL</button>
+              </div>
+            </div>
+
+            <div class="form-btn-row">
+              <button type="button" class="btn-secondary" id="btnBackStep2">← Back</button>
+              <button type="button" class="btn-submit" id="btnSubmitRegistration">
+                <span>Submit & Send Verification Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: OTP Code Verification -->
+          <div id="regStep3" class="reg-step-box">
+            <div class="otp-card">
+              <div class="otp-icon">✉️</div>
+              <h3 class="otp-title">Enter Verification Code</h3>
+              <p class="otp-desc">
+                We sent a 6-digit OTP verification code to <strong id="otpTargetEmail">your email</strong>.
+              </p>
+
+              <div class="otp-input-wrap">
+                <input type="text" id="regOtpInput" maxlength="6" placeholder="• • • • • •" class="otp-code-field">
+              </div>
+
+              <button type="button" class="btn-submit" id="btnVerifyOtp">
+                <span>Verify & Activate Account</span>
+              </button>
+
+              <button type="button" class="btn-link" id="btnResendOtp">
+                Resend Code
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-switch-text">
+            Already have an account? 
+            <a href="javascript:void(0)" onclick="switchToLogin()">Sign In here</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- VIEW 2: STUDENT DASHBOARD & UNIFORMS (LOGGED IN) -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <section id="dashboardSection" class="dashboard-section" style="display:none;">
+      
+      <!-- Welcome Banner -->
+      <div class="student-welcome-banner">
+        <div class="welcome-left">
+          <span class="badge-student-verified">✓ Verified Student</span>
+          <h1 class="welcome-heading" id="dashGreeting">Welcome, Olivarian!</h1>
+          <p class="welcome-sub" id="dashCourseSub">Enrolled in: Bachelor of Science in Nursing (BSN)</p>
+        </div>
+        <div class="welcome-right">
+          <div class="student-id-display">
+            <span class="id-label">STUDENT ID</span>
+            <span class="id-code" id="dashStudentId">232C-0018</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Tabs: Catalog / My Orders -->
+      <div class="dash-tabs">
+        <button class="dash-tab active" id="dashTabCatalog">Uniforms Catalog</button>
+        <button class="dash-tab" id="dashTabOrders">My Claim Orders</button>
+      </div>
+
+      <!-- ── TAB 1: UNIFORMS CATALOG ── -->
+      <div id="dashCatalogPane" class="dash-pane active">
+        
+        <!-- Filter Bar -->
+        <div class="catalog-filter-bar">
+          <div class="filter-chip-group">
+            <button class="cat-chip active" data-filter="MyCourse" id="btnMyCourseChip">My Course Uniforms</button>
+            <button class="cat-chip" data-filter="All">All Uniforms</button>
+            <button class="cat-chip" data-filter="Tops">Tops</button>
+            <button class="cat-chip" data-filter="Bottoms">Bottoms</button>
+            <button class="cat-chip" data-filter="PE wear">PE Wear</button>
+            <button class="cat-chip" data-filter="Accessories">Accessories</button>
+          </div>
+          <div class="search-input-wrap">
+            <input type="text" id="catalogSearch" placeholder="Search uniforms...">
+          </div>
+        </div>
+
+        <!-- Uniforms Grid -->
+        <div class="student-products-grid" id="studentProductsGrid">
+          <div class="skeleton-card">Loading uniforms...</div>
+        </div>
+      </div>
+
+      <!-- ── TAB 2: MY CLAIM ORDERS ── -->
+      <div id="dashOrdersPane" class="dash-pane">
+        <div class="orders-list-wrap" id="studentOrdersList">
+          <div class="empty-orders-state">Loading your claim slips...</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: Item Pre-order Confirmation -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-dialog small">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Pre-Order Uniform</h2>
+          <p class="modal-subtitle" id="orderModalSubtitle">Select size and schedule pickup</p>
+        </div>
+        <button class="modal-close-btn" id="btnOrderModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="item-summary-box">
+          <h3 id="modalItemName">Uniform Name</h3>
+          <div class="item-price" id="modalItemPrice">₱385.00</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Size *</label>
+          <div class="size-chips-row" id="modalSizeChips">
+            <button type="button" class="size-chip active">M</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Preferred Pickup Day *</label>
+          <select id="modalPickupDay">
+            <option value="Wednesday, Oct 1">Wednesday, Oct 1</option>
+            <option value="Thursday, Oct 2">Thursday, Oct 2</option>
+            <option value="Friday, Oct 3">Friday, Oct 3</option>
+            <option value="Saturday, Oct 4">Saturday, Oct 4</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Pickup Time Slot</label>
+          <select id="modalTimeSlot">
+            <option value="09:00 AM - 11:00 AM">09:00 AM - 11:00 AM</option>
+            <option value="01:00 PM - 03:00 PM">01:00 PM - 03:00 PM</option>
+            <option value="03:00 PM - 05:00 PM">03:00 PM - 05:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelOrderModal">Cancel</button>
+        <button type="button" class="btn-submit" id="btnConfirmPlaceOrder">Confirm Pre-Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="studentToast" class="student-toast">Notification message</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
