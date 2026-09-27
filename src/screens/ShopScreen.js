@@ -119,7 +119,9 @@ export default function ShopScreen({ navigation, route }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(ENDPOINTS.products);
+        const res = await fetch(ENDPOINTS.products, {
+          headers: { "ngrok-skip-browser-warning": "true" },
+        });
         const data = await res.json();
         if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
           const merged = data.data.map((item) => {

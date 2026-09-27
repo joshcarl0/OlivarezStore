@@ -6,7 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/OC-LOGO.png",
     "userInterfaceStyle": "light",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -14,11 +18,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/OC-LOGO.png",
         "backgroundColor": "#1a5c2e"
-      }
+      },
+      "package": "com.joshcarlsteam.olivarezstore"
     },
     "web": {
       "favicon": "./assets/OC-LOGO.png",
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a3e3d9f5-c2f9-4914-a729-42819ab0bbf9"
+      }
     }
   }
 }

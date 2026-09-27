@@ -49,7 +49,9 @@ export default function StaffDashboardScreen({ navigation }) {
   const loadOrders = async () => {
     try {
       const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_staff_orders.php`);
+      const res = await fetch(`${baseUrl}/get_staff_orders.php`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setOrders(data.data);
@@ -66,7 +68,9 @@ export default function StaffDashboardScreen({ navigation }) {
   const loadInventory = async () => {
     try {
       const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_inventory.php`);
+      const res = await fetch(`${baseUrl}/get_inventory.php`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setInventory(data.data);
@@ -112,7 +116,10 @@ export default function StaffDashboardScreen({ navigation }) {
       const baseUrl = ENDPOINTS.login.replace("/login.php", "");
       const res = await fetch(`${baseUrl}/update_order_status.php`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ order_id: orderId, status: newStatus }),
       });
       const data = await res.json();
@@ -132,7 +139,10 @@ export default function StaffDashboardScreen({ navigation }) {
       const baseUrl = ENDPOINTS.login.replace("/login.php", "");
       await fetch(`${baseUrl}/update_stock.php`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ product_id: productId, action, amount }),
       });
       loadInventory();
