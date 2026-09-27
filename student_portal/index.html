@@ -50,226 +50,269 @@
   <main class="main-content">
 
     <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- VIEW 1: AUTH VIEW (LOGIN & REGISTRATION) -->
+    <!-- VIEW 1: AUTH VIEW (EXACT TWIN OF MOBILE LOGIN SCREEN) -->
     <!-- ══════════════════════════════════════════════════════════ -->
     <section id="authSection" class="auth-section">
-      <div class="auth-card">
-        
-        <div class="auth-tabs">
-          <button class="auth-tab-btn active" id="tabBtnLogin">Student Sign In</button>
-          <button class="auth-tab-btn" id="tabBtnRegister">Create Account</button>
-        </div>
+      <div class="mobile-frame-container">
 
-        <!-- ── SUB-VIEW: LOGIN FORM ── -->
+        <!-- ── SUB-VIEW: LOGIN FORM (ICONIC MOBILE APP TWIN) ── -->
         <div id="loginFormPane" class="auth-pane active">
-          <div class="auth-header">
-            <h2 class="auth-title">Welcome, Olivarian!</h2>
-            <p class="auth-desc">Sign in with your Student ID or institutional Olivarez email</p>
+          
+          <!-- Green Header with Official Olivarez Seal -->
+          <div class="mobile-app-header">
+            <div class="seal-container">
+              <img src="logo.png" alt="Olivarez College Seal" class="seal-image" onerror="this.src='/staff_portal/logo.png'">
+            </div>
+            <h1 class="title-main">Olivarian</h1>
+            <h2 class="title-sub">Uniform Store<br>Supply</h2>
           </div>
 
-          <form id="studentLoginForm" class="form-body">
-            <div class="form-group">
-              <label class="form-label" for="loginIdentifier">Student ID or Email</label>
-              <div class="input-icon-wrap">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <input type="text" id="loginIdentifier" placeholder="e.g. 232C-0018 or joshcarl.fernan" required>
+          <!-- White Curved Card -->
+          <div class="mobile-app-card">
+            <form id="studentLoginForm" class="form-body">
+              
+              <div class="form-group">
+                <label class="form-label" for="loginIdentifier">Student ID or OC Email</label>
+                <div class="mobile-input-wrap">
+                  <input type="text" id="loginIdentifier" placeholder="e.g. 232C-0018 or joshcarl.fernan" required>
+                </div>
+                <span class="field-hint">Use your Student ID (232C-0018) or institutional email.</span>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label" for="loginPassword">Password</label>
-              <div class="input-icon-wrap">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+              <div class="form-group" style="margin-top: 18px;">
+                <label class="form-label" for="loginPassword">Password</label>
+                <div class="mobile-input-wrap password-wrap">
+                  <input type="password" id="loginPassword" placeholder="Enter your password here" required>
+                  <button type="button" class="eye-toggle-btn" id="togglePasswordVisibility" onclick="togglePassVisibility()" title="Show/Hide Password">👁️</button>
+                </div>
               </div>
-            </div>
 
-            <button type="submit" class="btn-submit" id="btnLoginSubmit">
-              <span>Sign In to Student Portal</span>
-            </button>
-
-            <!-- Quick Demo Credential Pills -->
-            <div class="demo-box">
-              <span class="demo-title">Quick Demo Login:</span>
-              <div class="demo-chips">
-                <button type="button" class="demo-chip" onclick="fillDemo('232C-0018', 'Olivarez2026!')">
-                  🎓 Josh Carl (College 232C-0018)
-                </button>
-                <button type="button" class="demo-chip" onclick="fillDemo('231S-0042', 'Olivarez2026!')">
-                  🧪 Maria Santos (SHS STEM)
-                </button>
+              <div class="forgot-row">
+                <a href="javascript:void(0)" onclick="alert('Forgot password? Please ask the Counter Staff or Super Admin to reset your password, or register a new student account.')" class="forgot-link">Forgot password?</a>
               </div>
-            </div>
 
-            <div class="auth-switch-text">
-              Don't have an account yet? 
-              <a href="javascript:void(0)" onclick="switchToRegister()">Create Student Account</a>
-            </div>
-          </form>
+              <button type="submit" class="btn-app-signin" id="btnLoginSubmit">
+                <span>Sign in</span>
+              </button>
+
+              <!-- Quick Demo Credential Pills -->
+              <div class="demo-box">
+                <span class="demo-title">Quick Demo Login:</span>
+                <div class="demo-chips">
+                  <button type="button" class="demo-chip" onclick="fillDemo('232C-0018', 'Olivarez2026!')">
+                    🎓 Josh Carl (College 232C-0018)
+                  </button>
+                  <button type="button" class="demo-chip" onclick="fillDemo('231S-0042', 'Olivarez2026!')">
+                    🧪 Maria Santos (SHS STEM)
+                  </button>
+                </div>
+              </div>
+
+              <div class="register-prompt-row">
+                <span class="reg-prompt-text">First time here? </span>
+                <a href="javascript:void(0)" onclick="switchToRegister()" class="reg-prompt-link">Register with your student ID</a>
+              </div>
+
+            </form>
+          </div>
+
         </div>
 
         <!-- ── SUB-VIEW: REGISTRATION FORM (CREATE ACCOUNT) ── -->
         <div id="registerFormPane" class="auth-pane">
-          <div class="auth-header">
-            <h2 class="auth-title">Create Student Account</h2>
-            <p class="auth-desc">Register with your official student information</p>
+          
+          <!-- Top Register Bar -->
+          <div class="reg-app-header">
+            <button type="button" class="btn-reg-back" onclick="switchToLogin()" title="Back to Sign In">‹</button>
+            <h2 class="reg-header-title">Create Account</h2>
+            <img src="logo.png" alt="Seal" class="reg-seal-small" onerror="this.src='/staff_portal/logo.png'">
           </div>
 
-          <!-- Wizard Step Indicator -->
-          <div class="steps-progress">
-            <div class="step-bubble active" id="bubbleStep1">1. Student Info</div>
-            <div class="step-connector"></div>
-            <div class="step-bubble" id="bubbleStep2">2. Course & Sizing</div>
-            <div class="step-connector"></div>
-            <div class="step-bubble" id="bubbleStep3">3. Verification</div>
+          <!-- Progress Segments -->
+          <div class="reg-progress-row">
+            <div class="progress-seg active" id="progSeg1"></div>
+            <div class="progress-seg" id="progSeg2"></div>
+            <div class="progress-seg" id="progSeg3"></div>
           </div>
 
-          <!-- Step 1: Personal Credentials -->
-          <div id="regStep1" class="reg-step-box active">
-            <div class="form-row">
+          <div class="reg-card-body">
+            
+            <!-- Step 1: Personal Credentials -->
+            <div id="regStep1" class="reg-step-box active">
+              <span class="reg-step-badge">Step 1 of 3</span>
+              <h3 class="reg-step-heading">Create your Olivarian account</h3>
+              <p class="reg-step-sub">Enter your student details to get started.</p>
+
               <div class="form-group">
                 <label class="form-label" for="regStudentId">Student ID Number *</label>
-                <input type="text" id="regStudentId" placeholder="e.g. 232C-0019" required>
+                <div class="mobile-input-wrap">
+                  <input type="text" id="regStudentId" placeholder="e.g. 232C-0019" required>
+                </div>
               </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="regFirstName">First Name *</label>
+                  <div class="mobile-input-wrap">
+                    <input type="text" id="regFirstName" placeholder="e.g. John" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="regLastName">Last Name *</label>
+                  <div class="mobile-input-wrap">
+                    <input type="text" id="regLastName" placeholder="e.g. Santos" required>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label class="form-label" for="regMobile">Mobile Number *</label>
-                <input type="tel" id="regMobile" placeholder="09171234567" required>
+                <div class="mobile-input-wrap">
+                  <input type="tel" id="regMobile" placeholder="09171234567" required>
+                </div>
               </div>
-            </div>
 
-            <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="regFirstName">First Name *</label>
-                <input type="text" id="regFirstName" placeholder="e.g. John" required>
+                <label class="form-label" for="regEmail">Email Address (for Verification OTP) *</label>
+                <div class="mobile-input-wrap">
+                  <input type="email" id="regEmail" placeholder="e.g. yourname@olivarezcollege.edu.ph" required>
+                </div>
+                <span class="field-hint">A real 6-digit OTP code will be dispatched to this email.</span>
               </div>
+
               <div class="form-group">
-                <label class="form-label" for="regLastName">Last Name *</label>
-                <input type="text" id="regLastName" placeholder="e.g. Santos" required>
+                <label class="form-label" for="regPassword">Create Password (Min 8 chars) *</label>
+                <div class="mobile-input-wrap">
+                  <input type="password" id="regPassword" placeholder="Enter strong password" required>
+                </div>
               </div>
+
+              <button type="button" class="btn-app-signin" id="btnNextStep1">
+                <span>Continue</span>
+              </button>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="regEmail">Email Address (for Verification OTP) *</label>
-              <input type="email" id="regEmail" placeholder="e.g. yourname@olivarezcollege.edu.ph" required>
-              <span class="field-hint">A real 6-digit OTP code will be dispatched to this email.</span>
-            </div>
+            <!-- Step 2: Department, Course, Gender, Sizes -->
+            <div id="regStep2" class="reg-step-box">
+              <span class="reg-step-badge">Step 2 of 3</span>
+              <h3 class="reg-step-heading">Department & Course Uniform</h3>
+              <p class="reg-step-sub">Select your program so we can display your prescribed uniforms.</p>
 
-            <div class="form-group">
-              <label class="form-label" for="regPassword">Create Password (Min 8 chars) *</label>
-              <input type="password" id="regPassword" placeholder="Enter strong password" required>
-            </div>
-
-            <button type="button" class="btn-submit" id="btnNextStep1">
-              <span>Next: Course & Sizing →</span>
-            </button>
-          </div>
-
-          <!-- Step 2: Department, Course, Gender, Sizes -->
-          <div id="regStep2" class="reg-step-box">
-            <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="regDept">Department *</label>
-                <select id="regDept">
-                  <option value="College">College (Higher Education)</option>
-                  <option value="Senior High">Senior High School (SHS)</option>
-                  <option value="Junior High">Junior High School (JHS)</option>
-                  <option value="Elementary">Elementary</option>
-                  <option value="Kindergarten">Kindergarten</option>
-                </select>
+                <div class="mobile-input-wrap">
+                  <select id="regDept">
+                    <option value="College">College (Higher Education)</option>
+                    <option value="Senior High">Senior High School (SHS)</option>
+                    <option value="Junior High">Junior High School (JHS)</option>
+                    <option value="Elementary">Elementary</option>
+                    <option value="Kindergarten">Kindergarten</option>
+                  </select>
+                </div>
               </div>
+
               <div class="form-group">
                 <label class="form-label" for="regCourse">Enrolled Course / Strand *</label>
-                <select id="regCourse">
-                  <optgroup label="College Programs">
-                    <option value="BSN">BSN (Nursing)</option>
-                    <option value="BSCrim">BSCrim (Criminology)</option>
-                    <option value="BSHM">BSHM (Hospitality Management)</option>
-                    <option value="BSTM">BSTM (Tourism Management)</option>
-                    <option value="BSCA">BSCA (Customs Administration)</option>
-                    <option value="BSRT">BSRT (Radiologic Technology)</option>
-                    <option value="BSIT">BSIT (Information Technology)</option>
-                    <option value="BSCS">BSCS (Computer Science)</option>
-                    <option value="BSBA">BSBA (Business Administration)</option>
-                    <option value="BSEd">BSEd (Education)</option>
-                    <option value="General College">General College</option>
-                  </optgroup>
-                  <optgroup label="Senior High Strands">
-                    <option value="STEM">STEM (Science & Tech)</option>
-                    <option value="ABM">ABM (Accountancy & Business)</option>
-                    <option value="HUMSS">HUMSS (Humanities)</option>
-                    <option value="TVL">TVL (Culinary / ICT)</option>
-                  </optgroup>
-                </select>
+                <div class="mobile-input-wrap">
+                  <select id="regCourse">
+                    <optgroup label="College Programs">
+                      <option value="BSN">BSN (Nursing)</option>
+                      <option value="BSCrim">BSCrim (Criminology)</option>
+                      <option value="BSHM">BSHM (Hospitality Management)</option>
+                      <option value="BSTM">BSTM (Tourism Management)</option>
+                      <option value="BSCA">BSCA (Customs Administration)</option>
+                      <option value="BSRT">BSRT (Radiologic Technology)</option>
+                      <option value="BSIT">BSIT (Information Technology)</option>
+                      <option value="BSCS">BSCS (Computer Science)</option>
+                      <option value="BSBA">BSBA (Business Administration)</option>
+                      <option value="BSEd">BSEd (Education)</option>
+                      <option value="General College">General College</option>
+                    </optgroup>
+                    <optgroup label="Senior High Strands">
+                      <option value="STEM">STEM (Science & Tech)</option>
+                      <option value="ABM">ABM (Accountancy & Business)</option>
+                      <option value="HUMSS">HUMSS (Humanities)</option>
+                      <option value="TVL">TVL (Culinary / ICT)</option>
+                    </optgroup>
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div class="form-row">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="regGender">Gender</label>
+                  <div class="mobile-input-wrap">
+                    <select id="regGender">
+                      <option value="Girls">Girls / Female</option>
+                      <option value="Boys">Boys / Male</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="regYearLevel">Year Level</label>
+                  <div class="mobile-input-wrap">
+                    <select id="regYearLevel">
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                      <option value="Grade 11">Grade 11</option>
+                      <option value="Grade 12">Grade 12</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
-                <label class="form-label" for="regGender">Gender</label>
-                <select id="regGender">
-                  <option value="Girls">Girls / Female</option>
-                  <option value="Boys">Boys / Male</option>
-                </select>
+                <label class="form-label">Approximate Uniform Size</label>
+                <div class="size-btn-group">
+                  <button type="button" class="size-choice-btn" data-size="S">S</button>
+                  <button type="button" class="size-choice-btn active" data-size="M">M</button>
+                  <button type="button" class="size-choice-btn" data-size="L">L</button>
+                  <button type="button" class="size-choice-btn" data-size="XL">XL</button>
+                  <button type="button" class="size-choice-btn" data-size="2XL">2XL</button>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label" for="regYearLevel">Year Level</label>
-                <select id="regYearLevel">
-                  <option value="1st Year">1st Year</option>
-                  <option value="2nd Year">2nd Year</option>
-                  <option value="3rd Year">3rd Year</option>
-                  <option value="4th Year">4th Year</option>
-                  <option value="Grade 11">Grade 11</option>
-                  <option value="Grade 12">Grade 12</option>
-                </select>
+
+              <div class="form-btn-row">
+                <button type="button" class="btn-secondary" id="btnBackStep2">← Back</button>
+                <button type="button" class="btn-app-signin" id="btnSubmitRegistration">
+                  <span>Submit & Send OTP</span>
+                </button>
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Approximate Uniform Size</label>
-              <div class="size-btn-group">
-                <button type="button" class="size-choice-btn" data-size="S">S</button>
-                <button type="button" class="size-choice-btn active" data-size="M">M</button>
-                <button type="button" class="size-choice-btn" data-size="L">L</button>
-                <button type="button" class="size-choice-btn" data-size="XL">XL</button>
-                <button type="button" class="size-choice-btn" data-size="2XL">2XL</button>
+            <!-- Step 3: OTP Code Verification -->
+            <div id="regStep3" class="reg-step-box">
+              <span class="reg-step-badge">Step 3 of 3</span>
+              <div class="otp-card">
+                <div class="otp-icon">✉️</div>
+                <h3 class="otp-title">Enter Verification Code</h3>
+                <p class="otp-desc">
+                  We sent a 6-digit OTP verification code to <strong id="otpTargetEmail">your email</strong>.
+                </p>
+
+                <div class="otp-input-wrap">
+                  <input type="text" id="regOtpInput" maxlength="6" placeholder="• • • • • •" class="otp-code-field">
+                </div>
+
+                <button type="button" class="btn-app-signin" id="btnVerifyOtp">
+                  <span>Verify & Activate Account</span>
+                </button>
+
+                <button type="button" class="btn-link" id="btnResendOtp">
+                  Resend Code
+                </button>
               </div>
             </div>
 
-            <div class="form-btn-row">
-              <button type="button" class="btn-secondary" id="btnBackStep2">← Back</button>
-              <button type="button" class="btn-submit" id="btnSubmitRegistration">
-                <span>Submit & Send Verification Code</span>
-              </button>
+            <div class="register-prompt-row" style="margin-top: 20px;">
+              <span class="reg-prompt-text">Already have an account? </span>
+              <a href="javascript:void(0)" onclick="switchToLogin()" class="reg-prompt-link">Sign In here</a>
             </div>
+
           </div>
 
-          <!-- Step 3: OTP Code Verification -->
-          <div id="regStep3" class="reg-step-box">
-            <div class="otp-card">
-              <div class="otp-icon">✉️</div>
-              <h3 class="otp-title">Enter Verification Code</h3>
-              <p class="otp-desc">
-                We sent a 6-digit OTP verification code to <strong id="otpTargetEmail">your email</strong>.
-              </p>
-
-              <div class="otp-input-wrap">
-                <input type="text" id="regOtpInput" maxlength="6" placeholder="• • • • • •" class="otp-code-field">
-              </div>
-
-              <button type="button" class="btn-submit" id="btnVerifyOtp">
-                <span>Verify & Activate Account</span>
-              </button>
-
-              <button type="button" class="btn-link" id="btnResendOtp">
-                Resend Code
-              </button>
-            </div>
-          </div>
-
-          <div class="auth-switch-text">
-            Already have an account? 
-            <a href="javascript:void(0)" onclick="switchToLogin()">Sign In here</a>
-          </div>
         </div>
 
       </div>

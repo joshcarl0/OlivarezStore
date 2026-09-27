@@ -105,36 +105,65 @@ function showToast(msg, isError = false) {
   }, 4000);
 }
 
+// Progress segments
+const progSeg1 = document.getElementById("progSeg1");
+const progSeg2 = document.getElementById("progSeg2");
+const progSeg3 = document.getElementById("progSeg3");
+
+function updateProgress(stepNum) {
+  if (progSeg1) progSeg1.classList.toggle("active", stepNum >= 1);
+  if (progSeg2) progSeg2.classList.toggle("active", stepNum >= 2);
+  if (progSeg3) progSeg3.classList.toggle("active", stepNum >= 3);
+  if (bubbleStep1) bubbleStep1.classList.toggle("active", stepNum === 1);
+  if (bubbleStep2) bubbleStep2.classList.toggle("active", stepNum === 2);
+  if (bubbleStep3) bubbleStep3.classList.toggle("active", stepNum === 3);
+}
+
 // ─────────────────────────────────────────────────────────────
 // 1. NAVIGATION & TAB SWITCHING
 // ─────────────────────────────────────────────────────────────
 window.switchToLogin = function() {
-  tabBtnLogin.classList.add("active");
-  tabBtnRegister.classList.remove("active");
+  if (tabBtnLogin) tabBtnLogin.classList.add("active");
+  if (tabBtnRegister) tabBtnRegister.classList.remove("active");
   loginFormPane.classList.add("active");
   registerFormPane.classList.remove("active");
 };
 
 window.switchToRegister = function() {
-  tabBtnRegister.classList.add("active");
-  tabBtnLogin.classList.remove("active");
+  if (tabBtnRegister) tabBtnRegister.classList.add("active");
+  if (tabBtnLogin) tabBtnLogin.classList.remove("active");
   registerFormPane.classList.add("active");
   loginFormPane.classList.remove("active");
+  updateProgress(1);
 };
 
-tabBtnLogin.addEventListener("click", window.switchToLogin);
-tabBtnRegister.addEventListener("click", window.switchToRegister);
+if (tabBtnLogin) tabBtnLogin.addEventListener("click", window.switchToLogin);
+if (tabBtnRegister) tabBtnRegister.addEventListener("click", window.switchToRegister);
 
 // Check URL Hash (e.g. /student_portal/#register)
 if (window.location.hash === "#register") {
   window.switchToRegister();
 }
 
+// Password eye toggle
+window.togglePassVisibility = function() {
+  const passInput = document.getElementById("loginPassword");
+  const btn = document.getElementById("togglePasswordVisibility");
+  if (!passInput) return;
+  if (passInput.type === "password") {
+    passInput.type = "text";
+    if (btn) btn.textContent = "🙈";
+  } else {
+    passInput.type = "password";
+    if (btn) btn.textContent = "👁️";
+  }
+};
+
 // Demo Credentials Filler
 window.fillDemo = function(id, pw) {
   loginIdentifier.value = id;
   loginPassword.value = pw;
-  showToast("Demo credentials filled! Click 'Sign In' to proceed.");
+  showToast("Demo credentials filled! Click 'Sign in' to proceed.");
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -169,16 +198,14 @@ btnNextStep1.addEventListener("click", () => {
   // Go to step 2
   regStep1.classList.remove("active");
   regStep2.classList.add("active");
-  bubbleStep1.classList.remove("active");
-  bubbleStep2.classList.add("active");
+  updateProgress(2);
 });
 
 // Step 2 -> Step 1 (Back)
 btnBackStep2.addEventListener("click", () => {
   regStep2.classList.remove("active");
   regStep1.classList.add("active");
-  bubbleStep2.classList.remove("active");
-  bubbleStep1.classList.add("active");
+  updateProgress(1);
 });
 
 // Step 2 -> Submit Registration (Call Backend & Send OTP)
@@ -229,8 +256,7 @@ btnSubmitRegistration.addEventListener("click", async () => {
     // Advance to Step 3
     regStep2.classList.remove("active");
     regStep3.classList.add("active");
-    bubbleStep2.classList.remove("active");
-    bubbleStep3.classList.add("active");
+    updateProgress(3);
 
   } catch (err) {
     showToast(err.message, true);
