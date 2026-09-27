@@ -1109,3 +1109,12 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// ─── ADMIN LOGOUT ──────────────────────────────────────────
+window.handleAdminLogout = function () {
+  if (confirm("Are you sure you want to sign out from the Super Admin Executive Portal?")) {
+    sessionStorage.removeItem("olivarez_admin_user");
+    localStorage.removeItem("admin_token");
+    window.location.href = window.location.origin + "/";
+  }
+};

@@ -523,3 +523,13 @@ function playSuccessSound() {
   const snd = document.getElementById("snd-success");
   if (snd) { snd.currentTime = 0; snd.play().catch(() => {}); }
 }
+
+// ─── LOGOUT / EXIT TO HUB ──────────────────────────────────
+function handleStaffLogout() {
+  if (confirm("Are you sure you want to sign out from the Cashier Releasing Counter?")) {
+    sessionStorage.removeItem("olivarez_staff_user");
+    localStorage.removeItem("staff_token");
+    window.location.href = window.location.origin + "/";
+  }
+}
+
