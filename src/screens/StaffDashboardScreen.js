@@ -487,34 +487,65 @@ export default function StaffDashboardScreen({ navigation }) {
                 key={o.id}
                 style={styles.queueCard}
                 onPress={() => selectOrder(o)}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
+                {/* 1. Header: Order Code & Status Badge */}
                 <View style={styles.queueHeader}>
                   <Text style={styles.queueOrderCode}>{o.order_code}</Text>
-                  <Text
+                  <View
                     style={[
-                      styles.queueStatus,
+                      styles.statusBadge,
                       o.status === "Completed"
-                        ? styles.textCompleted
+                        ? styles.badgeCompleted
                         : o.status === "Ready"
-                        ? styles.textReady
-                        : styles.textPending,
+                        ? styles.badgeReady
+                        : styles.badgePending,
                     ]}
                   >
-                    ● {o.status}
+                    <Text
+                      style={[
+                        styles.statusBadgeText,
+                        o.status === "Completed"
+                          ? styles.textCompleted
+                          : o.status === "Ready"
+                          ? styles.textReady
+                          : styles.textPending,
+                      ]}
+                    >
+                      {o.status}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* 2. Student Info */}
+                <Text style={styles.queueStudent}>
+                  {o.first_name} {o.last_name}
+                </Text>
+
+                <View style={styles.queueMetaRow}>
+                  <Text style={styles.queueIdBadge}>ID: {o.student_id}</Text>
+                  <Text style={styles.queueDeptText}>
+                    {o.department || "College"} • {o.items?.length || 0} item(s)
+                  </Text>
+                  <Text style={styles.queueAmount}>
+                    ₱{parseFloat(o.total_amount).toFixed(2)}
                   </Text>
                 </View>
 
-                <Text style={styles.queueStudent}>
-                  {o.first_name} {o.last_name} • ID: {o.student_id}
-                </Text>
-                <Text style={styles.queueMeta}>
-                  {o.department} • {o.items?.length || 0} item(s) • ₱{parseFloat(o.total_amount).toFixed(2)}
-                </Text>
+                {/* 3. Schedule Box */}
+                <View style={styles.queueScheduleBox}>
+                  <Ionicons name="calendar-outline" size={14} color="#92400e" style={{ marginRight: 6 }} />
+                  <Text style={styles.queueSlotText} numberOfLines={1}>
+                    {o.pickup_day} ({o.time_slot})
+                  </Text>
+                </View>
 
-                <View style={styles.queueFooter}>
-                  <Text style={styles.queueSlot}>📅 {o.pickup_day} ({o.time_slot})</Text>
-                  <Text style={styles.inspectLink}>Inspect & Release &gt;</Text>
+                {/* 4. Action Button */}
+                <View style={styles.queueActionRow}>
+                  <Text style={styles.queueActionText}>
+                    {o.status === "Completed" ? "View Released Receipt" : "Inspect & Release Order"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={OC_GREEN} />
                 </View>
               </TouchableOpacity>
             ))}
@@ -875,28 +906,91 @@ const styles = StyleSheet.create({
   filterChipTextActive: { color: "#ffffff" },
   queueCard: {
     backgroundColor: "#ffffff",
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1.5,
     borderColor: "#e5e7eb",
-    marginBottom: 10,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
   },
-  queueHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  queueOrderCode: { fontSize: 16, fontWeight: "800", color: OC_GREEN },
-  queueStatus: { fontSize: 12, fontWeight: "800" },
-  queueStudent: { fontSize: 14, fontWeight: "700", color: "#111", marginTop: 4 },
-  queueMeta: { fontSize: 12, color: "#6b7280", marginTop: 2 },
-  queueFooter: {
+  queueHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 10,
+    marginBottom: 6,
+  },
+  queueOrderCode: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: OC_GREEN,
+    letterSpacing: 0.5,
+  },
+  queueStudent: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  queueMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 10,
+  },
+  queueIdBadge: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#374151",
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  queueDeptText: {
+    fontSize: 12,
+    color: "#6b7280",
+    flex: 1,
+  },
+  queueAmount: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: OC_GREEN,
+  },
+  queueScheduleBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fffbeb",
+    borderWidth: 1,
+    borderColor: "#fde68a",
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  queueSlotText: {
+    fontSize: 11,
+    color: "#92400e",
+    fontWeight: "700",
+    flex: 1,
+  },
+  queueActionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: "#f3f4f6",
   },
-  queueSlot: { fontSize: 11, color: "#92400e", fontWeight: "600" },
-  inspectLink: { fontSize: 12, color: OC_GREEN, fontWeight: "800" },
+  queueActionText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: OC_GREEN,
+  },
   invTitle: { fontSize: 16, fontWeight: "800", color: "#111", marginBottom: 12 },
   invCard: {
     flexDirection: "row",
