@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olivarez College - Store Staff & Cashier Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- HTML5-QRCode Library for Web Camera Scanning -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Olivarez College Seal" class="header-logo" onerror="this.style.display='none'">
+      <div>
+        <h1 class="portal-title">Olivarian Uniform Store</h1>
+        <p class="portal-subtitle">Counter Staff & Cashier Releasing Portal</p>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <nav class="nav-tabs">
+        <button class="nav-tab active" id="tab-scan" onclick="switchTab('scan')">
+          <span class="tab-icon">⚡</span> Releasing & QR Scanner
+        </button>
+        <button class="nav-tab" id="tab-orders" onclick="switchTab('orders')">
+          <span class="tab-icon">📋</span> Orders Queue <span class="badge" id="orders-badge">0</span>
+        </button>
+        <button class="nav-tab" id="tab-inventory" onclick="switchTab('inventory')">
+          <span class="tab-icon">📦</span> Stock & Inventory
+        </button>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div class="station-badge">
+        <span class="status-indicator"></span>
+        <span>Counter 01 • Online</span>
+      </div>
+      <div class="live-clock" id="live-clock">--:--:--</div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-container">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- TAB 1: SCANNER & ORDER RELEASING -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section id="view-scan" class="view-panel active">
+      <div class="scan-grid">
+        
+        <!-- Left: Search & Scanner Input Card -->
+        <div class="card scanner-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Order Lookup & QR Scan</h2>
+              <p class="card-desc">Scan student's QR Claim Ticket or enter Order Code</p>
+            </div>
+            <button class="btn-secondary" id="btn-toggle-camera" onclick="toggleCameraScanner()">
+              <span id="cam-icon">📷</span> <span id="cam-text">Open Camera</span>
+            </button>
+          </div>
+
+          <!-- Camera Stream Container -->
+          <div id="qr-reader-container" class="camera-box" style="display: none;">
+            <div id="qr-reader"></div>
+            <p class="cam-hint">Point student's phone QR code towards the camera</p>
+          </div>
+
+          <!-- Input Bar -->
+          <form id="lookup-form" onsubmit="handleManualLookup(event)">
+            <div class="search-input-group">
+              <span class="search-icon">🔍</span>
+              <input 
+                type="text" 
+                id="lookup-input" 
+                class="form-control" 
+                placeholder="Enter Order Code (e.g. OL-1042) or Student ID" 
+                autocomplete="off"
+                autofocus
+              >
+              <button type="submit" class="btn-primary">Find Order</button>
+            </div>
+          </form>
+
+          <!-- Quick Test Presets (for Instant Demo) -->
+          <div class="presets-row">
+            <span class="presets-label">⚡ Quick Demo Test:</span>
+            <div id="quick-preset-buttons" class="preset-buttons">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Daily Counter Stats -->
+          <div class="stats-mini-grid">
+            <div class="mini-stat">
+              <span class="stat-num" id="stat-pending">0</span>
+              <span class="stat-lbl">Pending Pickup</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-num" id="stat-ready">0</span>
+              <span class="stat-lbl">Ready for Pickup</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-num stat-completed" id="stat-claimed">0</span>
+              <span class="stat-lbl">Claimed Today</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Active Order Verification & Releasing Details -->
+        <div class="card order-detail-card" id="order-detail-card">
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">🎟️</div>
+            <h3>No Order Selected</h3>
+            <p>Scan a QR Claim Ticket or enter an Order Code above to verify student's items.</p>
+          </div>
+
+          <div id="active-order-content" style="display: none;">
+            <!-- Header with Order Code and Status -->
+            <div class="order-hero-banner">
+              <div>
+                <span class="order-code-badge" id="detail-order-code">OL-0000</span>
+                <span class="order-date-text" id="detail-order-date">Date placed</span>
+              </div>
+              <div id="detail-status-badge" class="status-pill">Pending</div>
+            </div>
+
+            <!-- Student Identity Information -->
+            <div class="student-info-box">
+              <div class="student-avatar" id="detail-student-initials">SC</div>
+              <div class="student-meta">
+                <h3 class="student-name" id="detail-student-name">Student Full Name</h3>
+                <p class="student-sub" id="detail-student-dept">Department & Program</p>
+                <div class="student-badges">
+                  <span class="tag-badge" id="detail-student-id">ID: 232C-0018</span>
+                  <span class="tag-badge" id="detail-student-mobile">09310249079</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pickup Schedule Card -->
+            <div class="pickup-schedule-box">
+              <div class="schedule-item">
+                <span class="sched-icon">📅</span>
+                <div>
+                  <span class="sched-lbl">Pickup Day</span>
+                  <strong class="sched-val" id="detail-pickup-day">Wednesday, Oct 1</strong>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <span class="sched-icon">⏰</span>
+                <div>
+                  <span class="sched-lbl">Time Window</span>
+                  <strong class="sched-val" id="detail-time-slot">09:00 AM - 11:00 AM</strong>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <span class="sched-icon">💳</span>
+                <div>
+                  <span class="sched-lbl">Payment Mode</span>
+                  <strong class="sched-val" id="detail-payment-mode">Cash at Counter</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Uniform Items Checklist -->
+            <div class="items-section">
+              <div class="items-header">
+                <h4>Uniforms to Release (<span id="detail-items-count">0</span>)</h4>
+                <span class="checklist-hint">Check off each item as given to student:</span>
+              </div>
+              <div class="items-list" id="detail-items-list">
+                <!-- Dynamically populated items with checkboxes -->
+              </div>
+            </div>
+
+            <!-- Payment & Cashier Calculator -->
+            <div class="cashier-calc-box">
+              <div class="calc-row">
+                <span>Total Amount Due:</span>
+                <strong class="calc-total" id="detail-total-amount">₱0.00</strong>
+              </div>
+              <div class="calc-input-row">
+                <label for="cash-received">Cash Received (₱):</label>
+                <input type="number" id="cash-received" class="cash-input" placeholder="0.00" oninput="calculateChange()">
+                <div class="change-display">
+                  <span>Change:</span>
+                  <strong class="change-val" id="calc-change">₱0.00</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions-row">
+              <button class="btn-ready" id="btn-mark-ready" onclick="markActiveOrderReady()">
+                📦 Set Ready for Pickup
+              </button>
+              <button class="btn-complete" id="btn-mark-claimed" onclick="markActiveOrderClaimed()">
+                ✅ Complete & Release Uniform
+              </button>
+              <button class="btn-print" onclick="printReceipt()">
+                🖨️ Print Receipt Slip
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- TAB 2: LIVE ORDERS QUEUE -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section id="view-orders" class="view-panel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Live Orders Management Queue</h2>
+            <p class="card-desc">Real-time uniform reservations placed by students</p>
+          </div>
+          <button class="btn-secondary" onclick="loadStaffOrders()">
+            🔄 Refresh List
+          </button>
+        </div>
+
+        <!-- Filter Pills & Search -->
+        <div class="filter-bar">
+          <div class="status-pills">
+            <button class="filter-pill active" onclick="setOrdersFilter('All')">All Orders (<span id="cnt-all">0</span>)</button>
+            <button class="filter-pill" onclick="setOrdersFilter('Pending')">Pending (<span id="cnt-pending">0</span>)</button>
+            <button class="filter-pill" onclick="setOrdersFilter('Ready')">Ready for Pickup (<span id="cnt-ready">0</span>)</button>
+            <button class="filter-pill" onclick="setOrdersFilter('Completed')">Claimed (<span id="cnt-completed">0</span>)</button>
+          </div>
+          <div class="search-box">
+            <input type="text" id="queue-search" class="form-control" placeholder="Filter by Student ID, Name, or Order #" oninput="filterOrdersTable()">
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order Code</th>
+                <th>Student</th>
+                <th>Department & Course</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Pickup Slot</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- TAB 3: UNIFORM INVENTORY & STOCKS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section id="view-inventory" class="view-panel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Uniform Stock Inventory</h2>
+            <p class="card-desc">Check available quantities per department and adjust stock</p>
+          </div>
+          <div class="search-box" style="width: 320px;">
+            <input type="text" id="inv-search" class="form-control" placeholder="Search uniform name..." oninput="filterInventory()">
+          </div>
+        </div>
+
+        <!-- Department Tabs -->
+        <div class="dept-pills" id="dept-filter-bar">
+          <button class="dept-pill active" onclick="setInventoryDept('All')">All Departments</button>
+          <button class="dept-pill" onclick="setInventoryDept('College')">College</button>
+          <button class="dept-pill" onclick="setInventoryDept('Senior High')">Senior High</button>
+          <button class="dept-pill" onclick="setInventoryDept('Junior High')">Junior High</button>
+          <button class="dept-pill" onclick="setInventoryDept('Elementary')">Elementary</button>
+          <button class="dept-pill" onclick="setInventoryDept('Kindergarten')">Kindergarten</button>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div class="inventory-grid" id="inventory-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Printable Official Receipt Modal / Container -->
+  <div id="receipt-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card receipt-card">
+      <div class="receipt-header">
+        <img src="logo.png" alt="Logo" class="receipt-logo" onerror="this.style.display='none'">
+        <h3>OLIVAREZ COLLEGE</h3>
+        <p>Student Uniform Store & Supply Counter</p>
+        <p class="receipt-meta">Parañaque City • Counter Station 01</p>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-info-grid">
+        <div><strong>Order #:</strong> <span id="rec-order-code">OL-1042</span></div>
+        <div><strong>Date:</strong> <span id="rec-date">2026-09-27</span></div>
+        <div><strong>Student ID:</strong> <span id="rec-student-id">232C-0018</span></div>
+        <div><strong>Name:</strong> <span id="rec-name">Josh Carl Fernan</span></div>
+        <div style="grid-column: span 2;"><strong>Course:</strong> <span id="rec-course">College - BSIT</span></div>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <table class="receipt-table">
+        <thead>
+          <tr>
+            <th>Item & Size</th>
+            <th style="text-align: center;">Qty</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="rec-items-tbody"></tbody>
+      </table>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-summary">
+        <div class="rec-row"><span>Total Due:</span><strong id="rec-total">₱0.00</strong></div>
+        <div class="rec-row"><span>Cash Paid:</span><span id="rec-cash">₱0.00</span></div>
+        <div class="rec-row"><span>Change:</span><span id="rec-change">₱0.00</span></div>
+      </div>
+
+      <div class="receipt-footer">
+        <p>Status: <strong style="color: #1a5c2e;">OFFICIALLY RELEASED & CLAIMED</strong></p>
+        <p>Thank you, Olivarian! Please keep this receipt.</p>
+      </div>
+
+      <div class="modal-actions no-print">
+        <button class="btn-primary" onclick="window.print()">🖨️ Print Now</button>
+        <button class="btn-secondary" onclick="closeReceiptModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Chimes for Scan & Success Feedback -->
+  <audio id="snd-beep" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+  <audio id="snd-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
+
+  <script src="app.js"></script>
+</body>
+</html>
