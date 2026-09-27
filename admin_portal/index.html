@@ -682,6 +682,40 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: RESET PASSWORD FOR STAFF / CASHIER -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="resetPasswordModal">
+    <div class="modal-dialog small">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Reset Password</h2>
+          <p class="modal-subtitle" id="resetPwModalSubtitle">Set new login credentials for account</p>
+        </div>
+        <button class="modal-close-btn" id="btnResetPwModalClose">&times;</button>
+      </div>
+      <form id="resetPwForm" class="modal-form">
+        <input type="hidden" id="resetPwUserId" value="0">
+        <div class="form-group full-width">
+          <label class="form-label">Target Account</label>
+          <input type="text" id="resetPwUsernameDisplay" disabled style="background:#f1f5f9; font-weight:700;">
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">New Password *</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="resetPwInput" value="Staff2026!" required style="flex:1;">
+            <button type="button" class="btn-secondary" id="btnGenPassword" style="white-space:nowrap;">🎲 Generate</button>
+          </div>
+          <span style="font-size:11px; color:#64748b; margin-top:4px;">Will be hashed securely with BCRYPT in MySQL database.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelResetPwModal">Cancel</button>
+          <button type="submit" class="btn-primary">Confirm Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="adminToast" class="admin-toast">Notification message</div>
 

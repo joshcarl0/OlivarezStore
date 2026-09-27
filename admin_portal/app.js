@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupStaffModal();
   setupStaffFilters();
   setupLoginModal();
+  setupResetPasswordModal();
   setupImageUploader();
 
   // Load initial data
@@ -780,16 +781,19 @@ function renderStaffTable() {
         : `<span class="meta-tag red">Disabled</span>`;
 
       const isRoot = parseInt(st.id) <= 2;
-      const actionHtml = isRoot
-        ? `<span style="font-size:11px; color:var(--slate-400); font-weight:600;">System Protected</span>`
-        : `
-          <div style="display:flex; gap:6px;">
+      const actionHtml = `
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn-action-stock" style="padding:4px 8px; font-size:11px; background:#fef3c7; color:#b45309; border-color:#fde68a;" onclick="openResetPasswordModal(${st.id}, '${escapeHtml(st.username)}', '${escapeHtml(st.role)}')">
+              🔑 Reset PW
+            </button>
+            ${!isRoot ? `
             <button class="btn-action-stock" style="padding:4px 8px; font-size:11px;" onclick="toggleStaffActive(${st.id}, ${st.is_active == 1 ? 0 : 1})">
               ${st.is_active == 1 ? "Disable" : "Enable"}
             </button>
             <button class="btn-action-del" style="padding:4px 8px; font-size:11px;" onclick="deleteStaffAccount(${st.id}, '${escapeHtml(st.username)}')">
               🗑️
             </button>
+            ` : `<span style="font-size:11px; color:var(--slate-400); font-weight:600; padding:4px 0;">Root</span>`}
           </div>
         `;
 
@@ -1041,6 +1045,60 @@ function updateCurrentAdminUI(user) {
     avatarEl.textContent = initials;
   }
 }
+
+/* ── MODAL: RESET PASSWORD ── */
+function setupResetPasswordModal() {
+  const modal = document.getElementById("resetPasswordModal");
+  const btnClose = document.getElementById("btnResetPwModalClose");
+  const btnCancel = document.getElementById("btnCancelResetPwModal");
+  const form = document.getElementById("resetPwForm");
+  const input = document.getElementById("resetPwInput");
+  const btnGen = document.getElementById("btnGenPassword");
+
+  const closeModal = () => modal?.classList.remove("active");
+  btnClose?.addEventListener("click", closeModal);
+  btnCancel?.addEventListener("click", closeModal);
+
+  btnGen?.addEventListener("click", () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$";
+    let gen = "Olivarez" + Math.floor(100 + Math.random() * 900) + "!";
+    input.value = gen;
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("resetPwUserId").value) || 0;
+    const newPassword = input.value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/get_users.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset_password", id, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Success!\n\n${data.message}\n\nPlease inform the staff/cashier of their new password: ${newPassword}`);
+        showToast("Password reset successfully!");
+        closeModal();
+      } else {
+        alert("Failed to reset password: " + (data.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Reset password error:", err);
+      alert("Error connecting to server.");
+    }
+  });
+}
+
+window.openResetPasswordModal = function (id, username, role) {
+  const modal = document.getElementById("resetPasswordModal");
+  document.getElementById("resetPwUserId").value = id;
+  document.getElementById("resetPwUsernameDisplay").value = `${username} (${role})`;
+  document.getElementById("resetPwModalSubtitle").textContent = `Assign a new password for ${username}`;
+  document.getElementById("resetPwInput").value = role === "Super Admin" ? "Admin2026!" : "Staff2026!";
+  modal?.classList.add("active");
+};
 
 function escapeHtml(str) {
   if (!str) return "";

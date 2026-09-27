@@ -61,6 +61,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             sendError("Failed to update status: " . $stmt->error);
         }
+    } elseif ($action === "reset_password") {
+        $id = intval($input["id"] ?? 0);
+        $new_password = trim($input["new_password"] ?? "Staff2026!");
+
+        if ($id <= 0) {
+            sendError("Invalid account ID.");
+        }
+        if (strlen($new_password) < 6) {
+            sendError("Password must be at least 6 characters.");
+        }
+
+        $hash = password_hash($new_password, PASSWORD_BCRYPT);
+        $stmt = $db->prepare("UPDATE staff_users SET password_hash = ? WHERE id = ?");
+        $stmt->bind_param("si", $hash, $id);
+
+        if ($stmt->execute()) {
+            sendSuccess(["id" => $id, "temp_password" => $new_password], "Password has been successfully reset to: '{$new_password}'");
+        } else {
+            sendError("Failed to reset password: " . $stmt->error);
+        }
     } elseif ($action === "delete_staff") {
         $id = intval($input["id"] ?? 0);
         // Prevent deleting original admin ID 2
