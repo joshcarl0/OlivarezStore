@@ -68,21 +68,29 @@ export default function LoginScreen({ navigation }) {
     setStudentId(sanitizeInput(text));
   };
 
+  const showAlert = (title, msg) => {
+    if (Platform.OS === "web") {
+      window.alert(title ? `${title}\n\n${msg || ""}` : msg);
+    } else {
+      Alert.alert(title, msg);
+    }
+  };
+
   const handleLogin = async () => {
     // ── Lockout guard ──────────────────────────────────────
     if (lockoutMs > 0) {
-      Alert.alert("Account Locked", `Too many failed attempts.\nPlease wait ${formatCountdown(lockoutMs)} before trying again.`);
+      showAlert("Account Locked", `Too many failed attempts.\nPlease wait ${formatCountdown(lockoutMs)} before trying again.`);
       return;
     }
 
     // ── Input validation ───────────────────────────────────
     const cleanId = sanitizeInput(studentId);
     if (!cleanId) {
-      Alert.alert("Required", "Please enter your Student ID.");
+      showAlert("Required", "Please enter your Student ID.");
       return;
     }
     if (!password) {
-      Alert.alert("Required", "Please enter your password.");
+      showAlert("Required", "Please enter your password.");
       return;
     }
 
@@ -111,21 +119,22 @@ export default function LoginScreen({ navigation }) {
         const { lockedOut, attempts } = await recordFailedAttempt();
         if (lockedOut) {
           startLockoutTimer(5 * 60 * 1000);
-          Alert.alert(
+          showAlert(
             "Account Locked 🔒",
             `You have exceeded ${MAX_LOGIN_ATTEMPTS} failed login attempts.\nYour account is locked for 5 minutes.`
           );
         } else {
           const left = MAX_LOGIN_ATTEMPTS - attempts;
           setAttemptsLeft(left);
-          Alert.alert(
+          showAlert(
             "Login Failed",
             `${res.message || "Invalid credentials."}\n\n${left} attempt${left !== 1 ? "s" : ""} remaining before account lock.`
           );
         }
       }
     } catch (err) {
-      Alert.alert("Connection Error", "Cannot reach the server.\nMake sure XAMPP is running and check your API_BASE in config/api.js");
+      console.log("Login error:", err);
+      showAlert("Connection Error", `Cannot reach the backend API (${ENDPOINTS.login}).\nCheck if your backend/XAMPP or ngrok tunnel is online.`);
     } finally {
       setLoading(false);
     }
