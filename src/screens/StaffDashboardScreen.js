@@ -13,6 +13,7 @@ import {
   Modal,
   Image,
   Linking,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -47,6 +48,27 @@ export default function StaffDashboardScreen({ navigation }) {
   const [scannerBusy, setScannerBusy] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const scanLockRef = useRef(false);
+
+  // Listen for Google Code Scanner / Modern barcode scans
+  useEffect(() => {
+    let sub;
+    try {
+      if (CameraView?.isModernBarcodeScannerAvailable && typeof CameraView.onModernBarcodeScanned === "function") {
+        sub = CameraView.onModernBarcodeScanned((result) => {
+          if (result?.data) {
+            handleBarCodeScanned({ data: result.data });
+          }
+        });
+      }
+    } catch (e) {
+      console.log("Could not attach modern barcode scanner listener:", e);
+    }
+    return () => {
+      try {
+        sub?.remove?.();
+      } catch {}
+    };
+  }, []);
 
   const isSuperAdmin = staffInfo?.role === "Super Admin";
 
@@ -505,6 +527,24 @@ export default function StaffDashboardScreen({ navigation }) {
   };
 
   const openCameraScanner = async () => {
+    // 1. Try Google Code Scanner first (native Android QR scanner without black screen or layout bugs)
+    if (CameraView?.isModernBarcodeScannerAvailable && typeof CameraView.launchScanner === "function") {
+      try {
+        scanLockRef.current = false;
+        setScannerBusy(false);
+        await CameraView.launchScanner({ barcodeTypes: ["qr"] });
+        return;
+      } catch (scannerErr) {
+        console.log("launchScanner fallback or cancelled:", scannerErr);
+        // If user cancelled, don't force open the fallback modal
+        const msg = String(scannerErr?.message || "").toLowerCase();
+        if (msg.includes("cancel") || msg.includes("canceled")) {
+          return;
+        }
+      }
+    }
+
+    // 2. Fallback: In-App CameraView inside full-screen Modal
     try {
       let perm = cameraPermission;
       if (!perm || !perm.granted) {
@@ -1817,19 +1857,21 @@ export default function StaffDashboardScreen({ navigation }) {
       </Modal>
 
       {/* ═══════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {/* MODAL: CAMERA QR SCANNER */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <Modal
         visible={cameraModalVisible}
         animationType="slide"
         transparent={false}
+        statusBarTranslucent={true}
         onRequestClose={() => setCameraModalVisible(false)}
       >
-        <SafeAreaView style={styles.scannerSafeArea}>
-          <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <View style={styles.modalScannerContainer}>
+          <StatusBar barStyle="light-content" backgroundColor="#000000" translucent={true} />
 
           {/* Scanner Header */}
-          <View style={styles.scannerTopBar}>
+          <View style={[styles.scannerTopBar, { paddingTop: Math.max(insets.top, 24) }]}>
             <TouchableOpacity
               style={styles.scannerCloseBtn}
               onPress={() => setCameraModalVisible(false)}
@@ -1842,17 +1884,24 @@ export default function StaffDashboardScreen({ navigation }) {
 
           {/* Camera Viewfinder */}
           <View style={styles.cameraContainer}>
-            <CameraView
-              style={StyleSheet.absoluteFillObject}
-              facing="back"
-              barcodeScannerSettings={{
-                barcodeTypes: ["qr"],
-              }}
-              onBarcodeScanned={handleBarCodeScanned}
-            />
+            {cameraModalVisible && (
+              <CameraView
+                style={StyleSheet.absoluteFillObject}
+                facing="back"
+                barcodeScannerSettings={{
+                  barcodeTypes: ["qr"],
+                }}
+                onBarcodeScanned={scannerBusy ? undefined : handleBarCodeScanned}
+                onMountError={(e) => {
+                  console.log("Camera mount error:", e);
+                  Alert.alert("Camera Error", e?.message || "Could not start the camera.");
+                  setCameraModalVisible(false);
+                }}
+              />
+            )}
 
             {/* Viewfinder Target Frame Overlay */}
-            <View style={styles.scannerOverlay}>
+            <View style={styles.scannerOverlay} pointerEvents="none">
               <View style={styles.targetFrame}>
                 <View style={[styles.corner, styles.cornerTL]} />
                 <View style={[styles.corner, styles.cornerTR]} />
@@ -1866,7 +1915,7 @@ export default function StaffDashboardScreen({ navigation }) {
           </View>
 
           {/* Bottom Bar */}
-          <View style={styles.scannerBottomBar}>
+          <View style={[styles.scannerBottomBar, { paddingBottom: Math.max(insets.bottom, 24) }]}>
             <TouchableOpacity
               style={styles.scannerCancelBtn}
               onPress={() => setCameraModalVisible(false)}
@@ -1874,7 +1923,7 @@ export default function StaffDashboardScreen({ navigation }) {
               <Text style={styles.scannerCancelBtnText}>Close Scanner</Text>
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -3031,6 +3080,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalScannerContainer: {
+    flex: 1,
+    backgroundColor: "#000000",
   },
   scannerSafeArea: {
     flex: 1,
