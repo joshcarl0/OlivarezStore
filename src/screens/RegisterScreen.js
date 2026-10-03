@@ -3,10 +3,11 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, Alert, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Modal,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { ENDPOINTS, apiPost } from "../config/api";
 
-const OC_GREEN   = "#1a5c2e";
+const OC_GREEN   = "#0F5D33";
 const TOTAL_STEPS = 5;
 
 // ─── Progress Bar ─────────────────────────────────────────
@@ -37,8 +38,9 @@ function Header({ onBack }) {
 }
 
 function Footer({ label, onPress, loading }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.footer}>
+    <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) + 14 }]}>
       <TouchableOpacity style={styles.continueBtn} onPress={onPress} disabled={loading} activeOpacity={0.85}>
         {loading ? <ActivityIndicator color="#555" /> : <Text style={styles.continueBtnText}>{label || "Continue"}</Text>}
       </TouchableOpacity>
@@ -464,6 +466,7 @@ function Step2({ data, onContinue }) {
 // STEP 3 — Sizes (Tailored to Department, Course/Strand & Gender)
 // ════════════════════════════════════════════════════════════
 function Step3({ formData, onContinue, onSkip }) {
+  const insets = useSafeAreaInsets();
   const [blouse,   setBlouse]   = useState(null);
   const [skirt,    setSkirt]    = useState(null);
   const [peShirt,  setPeShirt]  = useState(null);
@@ -571,7 +574,7 @@ function Step3({ formData, onContinue, onSkip }) {
 
   return (
     <>
-      <ScrollView contentContainerStyle={[styles.body, { paddingBottom: 32 }]} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.body, { paddingBottom: Math.max(insets.bottom, 20) + 40 }]} keyboardShouldPersistTaps="handled">
         <Text style={styles.stepLabel}>Step 3 of 5</Text>
         <Text style={styles.stepTitle}>Set your usual sizes</Text>
         <Text style={styles.stepDesc}>{"Optional. We\u2019ll pre-select these when you shop."}</Text>
@@ -648,6 +651,7 @@ function Step4({ formData, onContinue }) {
   const [password, setPassword] = useState("");
   const [confirm,  setConfirm]  = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading,  setLoading]  = useState(false);
 
   const hasMin = password.length >= 8;
@@ -713,8 +717,17 @@ function Step4({ formData, onContinue }) {
 
         <Text style={styles.fieldLabel}>Password</Text>
         <View style={styles.passWrapper}>
-          <TextInput style={styles.passInput} value={password} onChangeText={setPassword} secureTextEntry={!showPass} placeholder={"•".repeat(8)} placeholderTextColor="#bbb" autoCapitalize="none" />
-          <TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showBtn}>
+          <TextInput
+            style={styles.passInput}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPass}
+            placeholder={"•".repeat(8)}
+            placeholderTextColor="#bbb"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showBtn} activeOpacity={0.7}>
+            <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={18} color={OC_GREEN} style={{ marginRight: 4 }} />
             <Text style={styles.showBtnText}>{showPass ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
         </View>
@@ -726,7 +739,21 @@ function Step4({ formData, onContinue }) {
         </View>
 
         <Text style={[styles.fieldLabel, { marginTop: 18 }]}>Confirm Password</Text>
-        <TextInput style={styles.input} value={confirm} onChangeText={setConfirm} secureTextEntry placeholder={"•".repeat(8)} placeholderTextColor="#bbb" autoCapitalize="none" />
+        <View style={styles.passWrapper}>
+          <TextInput
+            style={styles.passInput}
+            value={confirm}
+            onChangeText={setConfirm}
+            secureTextEntry={!showConfirm}
+            placeholder={"•".repeat(8)}
+            placeholderTextColor="#bbb"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)} style={styles.showBtn} activeOpacity={0.7}>
+            <Ionicons name={showConfirm ? "eye-off-outline" : "eye-outline"} size={18} color={OC_GREEN} style={{ marginRight: 4 }} />
+            <Text style={styles.showBtnText}>{showConfirm ? "Hide" : "Show"}</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <Footer label="Continue" onPress={handleContinue} loading={loading} />
     </>
@@ -881,13 +908,13 @@ const styles = StyleSheet.create({
   stepDesc         : { fontSize: 13, color: "#777", marginBottom: 20, lineHeight: 20 },
   fieldLabel       : { fontSize: 13, fontWeight: "600", color: "#333", marginBottom: 7 },
   input            : { backgroundColor: "#fff", borderRadius: 10, borderWidth: 1.5, borderColor: "#e2e2e2", paddingVertical: 13, paddingHorizontal: 14, fontSize: 15, color: "#222", marginBottom: 4 },
-  inputError       : { borderColor: "#e53935", backgroundColor: "#fff8f8" },
+  inputError       : { borderColor: "#F10930", backgroundColor: "#FFEEF1" },
   errorRow         : { flexDirection: "row", alignItems: "flex-start", marginTop: 4, marginBottom: 8 },
-  errorIcon        : { color: "#e53935", fontSize: 13, marginRight: 6, marginTop: 1 },
-  errorText        : { color: "#e53935", fontSize: 12, flex: 1, lineHeight: 18 },
-  infoBox          : { flexDirection: "row", backgroundColor: "#fef9e7", borderRadius: 10, padding: 12, marginTop: 14, alignItems: "flex-start" },
-  infoIcon         : { fontSize: 13, color: "#b8860b", marginRight: 8, marginTop: 1 },
-  infoText         : { fontSize: 13, color: "#7a6020", flex: 1, lineHeight: 18 },
+  errorIcon        : { color: "#F10930", fontSize: 13, marginRight: 6, marginTop: 1 },
+  errorText        : { color: "#F10930", fontSize: 12, flex: 1, lineHeight: 18 },
+  infoBox          : { flexDirection: "row", backgroundColor: "#FBEBB8", borderRadius: 10, padding: 12, marginTop: 14, alignItems: "flex-start" },
+  infoIcon         : { fontSize: 13, color: "#377445", marginRight: 8, marginTop: 1 },
+  infoText         : { fontSize: 13, color: "#0F5D33", flex: 1, lineHeight: 18, fontWeight: "600" },
   footer           : { paddingHorizontal: 20, paddingBottom: 28, paddingTop: 10, backgroundColor: "#fff" },
   continueBtn      : { backgroundColor: "#fff", borderRadius: 12, borderWidth: 1.5, borderColor: "#ccc", paddingVertical: 15, alignItems: "center" },
   continueBtnText  : { fontSize: 16, fontWeight: "600", color: "#333" },
@@ -914,7 +941,7 @@ const styles = StyleSheet.create({
   skipText         : { fontSize: 14, color: "#888", fontWeight: "500" },
   passWrapper      : { flexDirection: "row", alignItems: "center", borderRadius: 10, borderWidth: 1.5, borderColor: "#e2e2e2", backgroundColor: "#fff", marginBottom: 12 },
   passInput        : { flex: 1, paddingVertical: 13, paddingHorizontal: 14, fontSize: 15, color: "#222" },
-  showBtn          : { paddingHorizontal: 14 },
+  showBtn          : { flexDirection: "row", alignItems: "center", paddingHorizontal: 12 },
   showBtnText      : { fontSize: 13, fontWeight: "700", color: OC_GREEN },
   rulesBox         : { backgroundColor: "#f8f8f8", borderRadius: 10, padding: 14, gap: 8 },
   ruleRow          : { flexDirection: "row", alignItems: "center" },

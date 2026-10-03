@@ -67,7 +67,7 @@ function sendVerificationEmail($toEmail, $studentName, $otpCode) {
 }
 
 function sendSmtpMail($to, $subject, $htmlBody, $from, $fromName) {
-    $timeout = 10;
+    $timeout = 4;
     $context = stream_context_create([
         'ssl' => [
             'verify_peer' => false,

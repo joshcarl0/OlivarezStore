@@ -10,14 +10,15 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { ENDPOINTS } from "../config/api";
 import { useCart } from "../context/CartContext";
 
-const OC_GREEN = "#1a5c2e";
+const OC_GREEN = "#0F5D33";
 const OC_LIGHT_BG = "#f8f9fa";
-const OC_GOLD = "#f5a623";
+const OC_GOLD = "#FBEBB8";
+const OC_SECONDARY_GREEN = "#377445";
 
 // Default catalog matching the design mockup & database
 const INITIAL_PRODUCTS = [
@@ -101,6 +102,7 @@ const INITIAL_PRODUCTS = [
 ];
 
 export default function ShopScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
   const { totalCount } = useCart();
   const initialCategory = route.params?.category;
   const initialSearch = route.params?.search || "";
@@ -370,7 +372,10 @@ export default function ShopScreen({ navigation, route }) {
 
       {/* ── PRODUCT GRID (2 Columns) ── */}
       <ScrollView
-        contentContainerStyle={styles.gridContainer}
+        contentContainerStyle={[
+          styles.gridContainer,
+          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {filteredProducts.length === 0 ? (
@@ -558,16 +563,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFEEF1",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     zIndex: 2,
+    borderWidth: 1,
+    borderColor: "#F10930",
   },
   soldOutText: {
     fontSize: 10,
-    fontWeight: "700",
-    color: "#555",
+    fontWeight: "800",
+    color: "#F10930",
   },
   illustrationWrap: {
     alignItems: "center",

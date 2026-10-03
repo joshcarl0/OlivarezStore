@@ -21,10 +21,12 @@ import {
 } from "../utils/security";
 import { useCart } from "../context/CartContext";
 
-const OC_GREEN = "#1a5c2e";
-const OC_DARK_GREEN = "#144924";
-const OC_GOLD = "#f5a623";
+const OC_GREEN = "#0F5D33";
+const OC_DARK_GREEN = "#0B4626";
+const OC_GOLD = "#FBEBB8";
+const OC_SECONDARY_GREEN = "#377445";
 const OC_LIGHT_BG = "#f8f9fa";
+const OC_RED = "#F10930";
 
 export default function HomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -160,7 +162,7 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.studentName}>{studentName}</Text>
           <View style={styles.storeStatusRow}>
             <View style={styles.statusDot} />
-            <Text style={styles.storeStatusText}>Store open today until 5:00 PM</Text>
+            <Text style={styles.storeStatusText}>Store open today: 8:00 AM – 5:00 PM</Text>
           </View>
         </View>
 
@@ -211,7 +213,7 @@ export default function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate("Shop", { category: "ID Lace" })}
             >
               <View style={styles.bentoRightInner}>
-                <Ionicons name="ribbon-outline" size={40} color="#ffffff" />
+                <Ionicons name="ribbon-outline" size={40} color={OC_GREEN} />
                 <Text style={styles.bentoLacesTitle}>ID Laces</Text>
               </View>
             </TouchableOpacity>
@@ -299,7 +301,7 @@ export default function HomeScreen({ navigation }) {
       </ScrollView>
 
       {/* ── BOTTOM NAVIGATION BAR ── */}
-      <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 24) }]}>
+      <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 20) + 12 }]}>
         {/* Home */}
         <TouchableOpacity
           style={styles.navItem}
@@ -319,7 +321,7 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity
           style={styles.navItem}
           hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
-          onPress={() => navigation.navigate("Shop")}
+          onPress={() => { setActiveTab("shop"); navigation.navigate("Shop"); }}
           activeOpacity={0.7}
         >
           <Feather
@@ -334,7 +336,7 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity
           style={styles.navItem}
           hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
-          onPress={() => navigation.navigate("Orders")}
+          onPress={() => { setActiveTab("orders"); navigation.navigate("Orders"); }}
           activeOpacity={0.7}
         >
           <Ionicons
@@ -349,7 +351,7 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity
           style={styles.navItem}
           hitSlop={{ top: 12, bottom: 16, left: 16, right: 16 }}
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => { setActiveTab("profile"); navigation.navigate("Profile"); }}
           activeOpacity={0.7}
         >
           <Ionicons
@@ -400,7 +402,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 4,
     right: 4,
-    backgroundColor: OC_GOLD,
+    backgroundColor: OC_RED,
     borderRadius: 9,
     minWidth: 18,
     height: 18,
@@ -566,11 +568,11 @@ const styles = StyleSheet.create({
   },
   bentoPE: {
     flex: 1,
-    backgroundColor: "#2e7d32",
+    backgroundColor: OC_SECONDARY_GREEN,
     borderRadius: 18,
     paddingHorizontal: 16,
     justifyContent: "center",
-    shadowColor: "#2e7d32",
+    shadowColor: OC_SECONDARY_GREEN,
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
@@ -584,7 +586,7 @@ const styles = StyleSheet.create({
   bentoLacesTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#ffffff",
+    color: OC_GREEN,
   },
   bentoPETitle: {
     fontSize: 15,
@@ -700,7 +702,7 @@ const styles = StyleSheet.create({
   navItemText: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#888",
+    color: "#8B8B8A",
     marginTop: 2,
   },
   navItemTextActive: {

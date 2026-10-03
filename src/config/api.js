@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Must match KEY_AUTH_TOKEN in utils/security.js
 const AUTH_TOKEN_KEY = "auth_token";
 
-export const API_BASE = "http://192.168.100.5/olivarez-store/backend_api/";
+export const API_BASE = "https://subdepartmental-nakisha-postlabially.ngrok-free.dev/olivarez-store/backend_api/";
 
 export const ENDPOINTS = {
   verifyStudent: `${API_BASE}verify_student.php`,

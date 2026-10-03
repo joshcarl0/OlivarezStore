@@ -9,14 +9,17 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCart } from "../context/CartContext";
 
-const OC_GREEN = "#1a5c2e";
-const OC_GOLD = "#f5a623";
+const OC_GREEN = "#0F5D33";
+const OC_GOLD = "#FBEBB8";
+const OC_RED = "#F10930";
+const OC_SECONDARY_GREEN = "#377445";
 
 export default function CartScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { cart, updateQuantity, removeFromCart, totalCount, totalPrice } = useCart();
 
   const handleCheckout = () => {
@@ -116,7 +119,7 @@ export default function CartScreen({ navigation }) {
                       style={styles.deleteBtn}
                       onPress={() => removeFromCart(item.cartKey)}
                     >
-                      <Ionicons name="trash-outline" size={16} color="#aaa" />
+                      <Ionicons name="trash-outline" size={16} color={OC_RED} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -152,13 +155,13 @@ export default function CartScreen({ navigation }) {
 
       {/* ── BOTTOM BUTTON ── */}
       {cart.length > 0 && (
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 20) + 16 }]}>
           <TouchableOpacity
             activeOpacity={0.88}
             style={styles.checkoutBtn}
             onPress={handleCheckout}
           >
-            <Text style={styles.checkoutBtnText}>Choose pickup time</Text>
+            <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -323,18 +326,18 @@ const styles = StyleSheet.create({
   noticeBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fef8e7",
+    backgroundColor: "#FBEBB8",
     padding: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#fce9b5",
+    borderColor: "#EBE0BE",
   },
   noticeText: {
     flex: 1,
     fontSize: 12,
-    color: "#8a6100",
+    color: "#0F5D33",
     lineHeight: 17,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   // Bottom Bar
   bottomBar: {

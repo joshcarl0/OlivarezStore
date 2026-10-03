@@ -4,22 +4,26 @@
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --oc-green-900: #0f361a;
-  --oc-green-800: #144923;
-  --oc-green-700: #1a5c2e;
-  --oc-green-600: #23783c;
+  --oc-green-900: #08301a;
+  --oc-green-800: #0b4626;
+  --oc-green-700: #0F5D33;
+  --oc-green-600: #0F5D33;
+  --oc-green-500: #377445;
   --oc-green-100: #eaf5ed;
   --oc-green-50:  #f4faf5;
 
-  --oc-gold-700:  #b38e2d;
-  --oc-gold-500:  #c9a84c;
-  --oc-gold-400:  #deb853;
-  --oc-gold-100:  #fbf6e8;
+  --oc-gold-700:  #96751a;
+  --oc-gold-500:  #FBEBB8;
+  --oc-gold-400:  #EBE0BE;
+  --oc-gold-100:  #FBEBB8;
+
+  --danger-color: #F10930;
+  --danger-light: #FFEEF1;
 
   --bg-page:      #f5f7f6;
   --bg-card:      #ffffff;
   --text-main:    #1e293b;
-  --text-muted:   #64748b;
+  --text-muted:   #8B8B8A;
   --border-color: #e2e8f0;
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

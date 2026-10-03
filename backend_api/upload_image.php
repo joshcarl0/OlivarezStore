@@ -19,7 +19,12 @@ if (!file_exists($uploadDir)) {
 // Determine protocol and host for absolute URL
 $protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https" : "http";
 $host = $_SERVER["HTTP_HOST"] ?? "localhost";
-$baseUrl = "{$protocol}://{$host}/olivarez_api/uploads/";
+$scriptDir = dirname($_SERVER["SCRIPT_NAME"] ?? "/olivarez-store/backend_api");
+$scriptDir = str_replace("\\", "/", $scriptDir);
+if (substr($scriptDir, -1) !== "/") {
+    $scriptDir .= "/";
+}
+$baseUrl = "{$protocol}://{$host}{$scriptDir}uploads/";
 
 // Check if standard multipart file upload
 if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {

@@ -8,14 +8,15 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { secureLogout } from "../utils/security";
 
-const OC_GREEN = "#1a5c2e";
+const OC_GREEN = "#0F5D33";
 
 export default function ProfileScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [student, setStudent] = useState(null);
 
   useEffect(() => {
@@ -23,8 +24,8 @@ export default function ProfileScreen({ navigation }) {
       try {
         const str = await AsyncStorage.getItem("student_info");
         if (str) setStudent(JSON.parse(str));
-      } catch (err) {
-        console.log(err);
+      } catch (_) {
+        // silently ignore
       }
     })();
   }, []);
@@ -56,7 +57,12 @@ export default function ProfileScreen({ navigation }) {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+        ]}
+      >
         {/* Profile Card */}
         <View style={styles.profileHeaderCard}>
           <View style={styles.avatarBox}>
@@ -130,6 +136,7 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={18} color="#999" />
           </TouchableOpacity>
         </View>
+
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
@@ -278,11 +285,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#f8d7da",
-    backgroundColor: "#fff5f5",
+    borderColor: "#FFEEF1",
+    backgroundColor: "#FFEEF1",
   },
   logoutBtnText: {
-    color: "#dc3545",
+    color: "#F10930",
     fontSize: 15,
     fontWeight: "700",
     marginLeft: 8,

@@ -5,28 +5,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
-  const [orders, setOrders] = useState([
-    {
-      orderId: "OL-1042",
-      date: "Tue, Sep 22 • 9:00 AM",
-      itemsSummary: "4 items • Window 2, 9:00 AM",
-      details: "2 blouses, 1 skirt, 1 ID lace",
-      total: 2425,
-      paymentMethod: "Hello Money",
-      status: "Ready", // Placed, Packing, Ready, Claimed
-      step: 3, // 1 to 4
-    },
-    {
-      orderId: "OL-1000",
-      date: "Mon, Sep 15 • 9:00 AM",
-      itemsSummary: "4 items • Window 2, 9:00 AM",
-      details: "2 PE shirts, 2 PE shorts",
-      total: 1060,
-      paymentMethod: "Cash at Counter",
-      status: "Claimed",
-      step: 4,
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
 
   // Load saved cart and orders on mount
   useEffect(() => {
@@ -40,8 +19,8 @@ export function CartProvider({ children }) {
           const parsed = JSON.parse(savedOrders);
           if (parsed && parsed.length > 0) setOrders(parsed);
         }
-      } catch (err) {
-        console.log("Error loading cart/orders:", err);
+      } catch (_) {
+        // silently ignore
       }
     })();
   }, []);
@@ -51,9 +30,9 @@ export function CartProvider({ children }) {
     setCart(newCart);
     try {
       await AsyncStorage.setItem("user_cart", JSON.stringify(newCart));
-    } catch (err) {
-      console.log("Error saving cart:", err);
-    }
+    } catch (_) {
+        // silently ignore
+      }
   };
 
   const addToCart = (product, size, quantity = 1) => {
@@ -108,8 +87,8 @@ export function CartProvider({ children }) {
     setOrders(newOrders);
     try {
       await AsyncStorage.setItem("user_orders", JSON.stringify(newOrders));
-    } catch (err) {
-      console.log("Error saving orders:", err);
+    } catch (_) {
+      // silently ignore
     }
   };
 

@@ -58,8 +58,8 @@ export default function App() {
   if (initialRoute === null) {
     return (
       <SafeAreaProvider>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#1a5c2e" }}>
-          <ActivityIndicator size="large" color="#c9a84c" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#0F5D33" }}>
+          <ActivityIndicator size="large" color="#FBEBB8" />
         </View>
       </SafeAreaProvider>
     );

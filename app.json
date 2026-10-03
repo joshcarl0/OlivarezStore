@@ -17,10 +17,39 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/OC-LOGO.png",
-        "backgroundColor": "#1a5c2e"
+        "backgroundColor": "#0F5D33"
       },
-      "package": "com.joshcarlsteam.olivarezstore"
+      "package": "com.joshcarlsteam.olivarezstore",
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ]
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Olivarian Store Supply to access your camera to scan student QR claim tickets."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Olivarian Store Supply to save pickup tickets to your gallery.",
+          "savePhotosPermission": "Allow Olivarian Store Supply to save pickup tickets to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Olivarian Store Supply to access your photos to select uniform images."
+        }
+      ],
+      "expo-sharing"
+    ],
     "web": {
       "favicon": "./assets/OC-LOGO.png",
       "bundler": "metro"

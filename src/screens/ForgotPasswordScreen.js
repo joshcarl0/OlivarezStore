@@ -1,11 +1,12 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-const OC_GREEN = "#1a5c2e";
-const OC_GOLD = "#c9a84c";
+const OC_GREEN = "#0F5D33";
+const OC_GOLD = "#FBEBB8";
 
 export default function ForgotPasswordScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +27,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         <Text style={styles.title}>Forgot Password</Text>
         <Text style={styles.sub}>Enter your OC email to reset your password</Text>
       </View>
-      <View style={styles.card}>
+      <View style={[styles.card, { paddingBottom: Math.max(insets.bottom, 24) + 24 }]}>
         <Text style={styles.label}>OC Email Address</Text>
         <View style={styles.emailWrapper}>
           <TextInput
@@ -34,7 +35,7 @@ export default function ForgotPasswordScreen({ navigation }) {
             value={email}
             onChangeText={setEmail}
             placeholder="yourname"
-            placeholderTextColor="#aaa"
+            placeholderTextColor="#8B8B8A"
             autoCapitalize="none"
             keyboardType="email-address"
           />
@@ -53,14 +54,14 @@ export default function ForgotPasswordScreen({ navigation }) {
 const styles = StyleSheet.create({
   header: { backgroundColor: OC_GREEN, alignItems: "center", paddingTop: 40, paddingBottom: 40 },
   title: { fontSize: 26, fontWeight: "800", color: "#fff" },
-  sub: { fontSize: 13, color: OC_GOLD, marginTop: 6, textAlign: "center", paddingHorizontal: 24 },
+  sub: { fontSize: 14, color: OC_GOLD, marginTop: 6, textAlign: "center", paddingHorizontal: 24, fontWeight: "600" },
   card: { flex: 1, backgroundColor: "#f7f7f7", borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 28 },
   label: { fontSize: 13, fontWeight: "600", color: "#333", marginBottom: 8 },
   emailWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 12, borderWidth: 1.5, borderColor: "#e0e0e0" },
   emailInput: { flex: 1, paddingVertical: 14, paddingHorizontal: 16, fontSize: 15, color: "#222" },
-  domain: { fontSize: 11, color: "#999", paddingRight: 10 },
+  domain: { fontSize: 11, color: "#8B8B8A", paddingRight: 10 },
   btn: { backgroundColor: OC_GREEN, borderRadius: 12, paddingVertical: 16, alignItems: "center", marginTop: 24, elevation: 4 },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
   backBtn: { alignItems: "center", marginTop: 20 },
-  backText: { fontSize: 13, color: OC_GOLD, fontWeight: "600" },
+  backText: { fontSize: 13, color: OC_GREEN, fontWeight: "700" },
 });

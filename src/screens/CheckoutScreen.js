@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,44 +8,54 @@ import {
   Image,
   Alert,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "../context/CartContext";
 import { apiPost, ENDPOINTS } from "../config/api";
 
-const OC_GREEN = "#1a5c2e";
-const OC_GOLD = "#f5a623";
+const OC_GREEN = "#0F5D33";
+const OC_GOLD = "#FBEBB8";
+const OC_SECONDARY_GREEN = "#377445";
 
-const PICKUP_DAYS = [
-  { id: "1", day: "Tue", date: "22", month: "Sep", full: "Tue, Sep 22" },
-  { id: "2", day: "Wed", date: "23", month: "Sep", full: "Wed, Sep 23" },
-  { id: "3", day: "Thu", date: "24", month: "Sep", full: "Thu, Sep 24" },
-  { id: "4", day: "Fri", date: "25", month: "Sep", full: "Fri, Sep 25" },
-];
+const DAY_NAMES  = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-const TIME_SLOTS = [
-  { id: "t1", time: "8:00 AM", slots: "6 slots", disabled: false },
-  { id: "t2", time: "9:00 AM", slots: "4 slots", disabled: false },
-  { id: "t3", time: "10:00 AM", slots: "Full", disabled: true },
-  { id: "t4", time: "11:00 AM", slots: "6 slots", disabled: false },
-  { id: "t5", time: "1:00 PM", slots: "4 slots", disabled: false },
-  { id: "t6", time: "2:00 PM", slots: "4 slots", disabled: false },
-];
+/** Generates the next `count` weekdays (Mon–Fri) starting from tomorrow. */
+function getNextWeekdays(count = 4) {
+  const days = [];
+  const cursor = new Date();
+  cursor.setDate(cursor.getDate() + 1); // start from tomorrow
+  while (days.length < count) {
+    const dow = cursor.getDay(); // 0=Sun, 6=Sat
+    if (dow !== 0 && dow !== 6) {
+      days.push({
+        id: String(days.length + 1),
+        day: DAY_NAMES[dow],
+        date: String(cursor.getDate()),
+        month: MONTH_NAMES[cursor.getMonth()],
+        full: `${DAY_NAMES[dow]}, ${MONTH_NAMES[cursor.getMonth()]} ${cursor.getDate()}`,
+      });
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return days;
+}
 
 export default function CheckoutScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { cart, totalPrice, addOrder, clearCart } = useCart();
 
-  const [selectedDay, setSelectedDay] = useState(PICKUP_DAYS[0]);
-  const [selectedSlot, setSelectedSlot] = useState(TIME_SLOTS[1]); // 9:00 AM
-  const [paymentMethod, setPaymentMethod] = useState("Hello Money"); // "Hello Money" | "Pay at the counter"
+  const PICKUP_DAYS = useMemo(() => getNextWeekdays(4), []);
+  const [selectedDay, setSelectedDay] = useState(() => getNextWeekdays(4)[0]);
+  const [paymentMethod, setPaymentMethod] = useState("Hello Money");
+  const [placing, setPlacing] = useState(false);
 
   const handlePlaceOrder = async () => {
-    if (!selectedSlot) {
-      Alert.alert("Time Slot", "Please select a preferred pickup time slot.");
-      return;
-    }
+
+    setPlacing(true);
 
     // Generate random Order code like OL-1042
     const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -58,13 +68,13 @@ export default function CheckoutScreen({ navigation }) {
 
     const newOrder = {
       orderId,
-      date: `${selectedDay.full} • ${selectedSlot.time}`,
-      itemsSummary: `${cart.length} items • Window 2, ${selectedSlot.time}`,
+      date: `${selectedDay.full}`,
+      itemsSummary: `${cart.length} item${cart.length !== 1 ? "s" : ""} • Window 2 (8:00 AM - 5:00 PM)`,
       details: itemsSummary,
       total: totalPrice,
       paymentMethod,
       status: "Placed",
-      step: 1, // Placed (1), Packing (2), Ready (3), Claimed (4)
+      step: 1,
     };
 
     try {
@@ -79,22 +89,35 @@ export default function CheckoutScreen({ navigation }) {
         unit_price: c.price,
       }));
 
-      await apiPost(ENDPOINTS.placeOrder, {
+      const res = await apiPost(ENDPOINTS.placeOrder, {
         student_id: studentId,
         order_code: orderId,
         total_amount: totalPrice,
         pickup_day: selectedDay.full,
-        time_slot: selectedSlot.time,
+        time_slot: "Store Hours (8:00 AM – 5:00 PM)",
         payment_method: paymentMethod,
         items: apiItems,
       });
+
+      if (!res?.success) {
+        // Non-blocking warning — order still saved locally
+        Alert.alert(
+          "Notice",
+          "Your order was saved locally but could not sync to the server. It will appear in your order history."
+        );
+      }
     } catch (e) {
-      console.log("Error sending order to DB:", e);
+      // Network error — save locally and warn user
+      Alert.alert(
+        "Connection Error",
+        "Could not reach the server. Your order has been saved locally. Please check your connection."
+      );
+    } finally {
+      setPlacing(false);
     }
 
     addOrder(newOrder);
     clearCart();
-
     navigation.replace("OrderSuccess", { order: newOrder });
   };
 
@@ -144,44 +167,13 @@ export default function CheckoutScreen({ navigation }) {
           })}
         </View>
 
-        {/* ── TIME SLOT ── */}
-        <Text style={[styles.sectionHeading, { marginTop: 22 }]}>Time slot</Text>
-        <View style={styles.slotsGrid}>
-          {TIME_SLOTS.map((slot) => {
-            const isSelected = selectedSlot.id === slot.id;
-            const isDisabled = slot.disabled;
-            return (
-              <TouchableOpacity
-                key={slot.id}
-                disabled={isDisabled}
-                style={[
-                  styles.slotCard,
-                  isSelected && styles.slotCardActive,
-                  isDisabled && styles.slotCardDisabled,
-                ]}
-                onPress={() => setSelectedSlot(slot)}
-              >
-                <Text
-                  style={[
-                    styles.slotTime,
-                    isSelected && styles.slotTimeActive,
-                    isDisabled && styles.slotTimeDisabled,
-                  ]}
-                >
-                  {slot.time}
-                </Text>
-                <Text
-                  style={[
-                    styles.slotCapacity,
-                    isSelected && styles.slotCapacityActive,
-                    isDisabled && styles.slotCapacityDisabled,
-                  ]}
-                >
-                  {slot.slots}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+        {/* ── STORE HOURS NOTICE ── */}
+        <View style={styles.storeHoursBanner}>
+          <Ionicons name="time-outline" size={18} color={OC_GREEN} />
+          <View style={{ flex: 1, marginLeft: 8 }}>
+            <Text style={styles.storeHoursTitle}>Store Hours: 8:00 AM – 5:00 PM</Text>
+            <Text style={styles.storeHoursSub}>You can claim your items anytime during store hours at Window 2.</Text>
+          </View>
         </View>
 
         {/* ── PAYMENT METHOD ── */}
@@ -226,15 +218,17 @@ export default function CheckoutScreen({ navigation }) {
       </ScrollView>
 
       {/* ── BOTTOM BUTTON ── */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 20) + 16 }]}>
         <TouchableOpacity
           activeOpacity={0.88}
-          style={styles.placeOrderBtn}
+          style={[styles.placeOrderBtn, placing && styles.placeOrderBtnDisabled]}
           onPress={handlePlaceOrder}
+          disabled={placing}
         >
-          <Text style={styles.placeOrderBtnText}>
-            Place order - ₱ {totalPrice.toFixed(2)}
-          </Text>
+          {placing
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.placeOrderBtnText}>Place order — ₱ {totalPrice.toFixed(2)}</Text>
+          }
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -325,52 +319,27 @@ const styles = StyleSheet.create({
   dayMonthActive: {
     color: OC_GREEN,
   },
-  // Slots grid
-  slotsGrid: {
+  // Store Hours Banner
+  storeHoursBanner: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    justifyContent: "space-between",
-  },
-  slotCard: {
-    width: "31%",
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f0f7f2",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "#d1e7dd",
   },
-  slotCardActive: {
-    backgroundColor: OC_GREEN,
-    borderColor: OC_GREEN,
-  },
-  slotCardDisabled: {
-    backgroundColor: "#f8f9fa",
-    borderColor: "#e9ecef",
-    opacity: 0.6,
-  },
-  slotTime: {
+  storeHoursTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1c2833",
+    color: OC_GREEN,
   },
-  slotTimeActive: {
-    color: "#ffffff",
-  },
-  slotTimeDisabled: {
-    color: "#adb5bd",
-  },
-  slotCapacity: {
+  storeHoursSub: {
     fontSize: 11,
-    color: "#6c757d",
+    color: "#4b5563",
     marginTop: 2,
-  },
-  slotCapacityActive: {
-    color: "#e8f5e9",
-  },
-  slotCapacityDisabled: {
-    color: "#adb5bd",
   },
   // Payment
   paymentSection: {
@@ -423,12 +392,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   placeOrderBtn: {
-    backgroundColor: OC_GOLD,
+    backgroundColor: OC_GREEN,
     paddingVertical: 15,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: OC_GOLD,
+    shadowColor: OC_GREEN,
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
@@ -438,5 +407,8 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "800",
+  },
+  placeOrderBtnDisabled: {
+    opacity: 0.7,
   },
 });

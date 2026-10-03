@@ -75,8 +75,13 @@ $ins->bind_param("ssssssssssssssss", $studentId, $lName, $fName, $email, $mobile
 
 if (!$ins->execute()) sendError("Registration failed: " . $db->error, 500);
 
-// Send verification email via SMTP if configured
-$mailResult = sendVerificationEmail($email, "{$fName} {$lName}", $otp);
+// Send verification email via SMTP if configured (safe fallback)
+$mailResult = ["success" => false, "message" => "SMTP not attempted"];
+try {
+    $mailResult = sendVerificationEmail($email, "{$fName} {$lName}", $otp);
+} catch (\Throwable $e) {
+    $mailResult = ["success" => false, "message" => $e->getMessage()];
+}
 
 sendSuccess([
     "otp_debug"   => $otp,

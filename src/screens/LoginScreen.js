@@ -4,7 +4,7 @@ import {
   StatusBar, KeyboardAvoidingView, Platform, ScrollView,
   ActivityIndicator, Alert, Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ENDPOINTS, apiPost } from "../config/api";
 import {
@@ -19,11 +19,12 @@ import {
   MAX_LOGIN_ATTEMPTS,
 } from "../utils/security";
 
-const OC_GREEN = "#1a5c2e";
-const OC_GOLD  = "#c9a84c";
+const OC_GREEN = "#0F5D33";
+const OC_GOLD  = "#FBEBB8";
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail]           = useState("");
+  const insets = useSafeAreaInsets();
+  const [studentId, setStudentId]   = useState("");
   const [password, setPassword]     = useState("");
   const [showPassword, setShowPass] = useState(false);
   const [loading, setLoading]       = useState(false);
@@ -63,8 +64,8 @@ export default function LoginScreen({ navigation }) {
     }, 1000);
   }
 
-  const handleEmailChange = (text) => {
-    setEmail(sanitizeInput(text));
+  const handleIdChange = (text) => {
+    setStudentId(sanitizeInput(text));
   };
 
   const handleLogin = async () => {
@@ -75,9 +76,9 @@ export default function LoginScreen({ navigation }) {
     }
 
     // ── Input validation ───────────────────────────────────
-    const cleanId = sanitizeInput(email);
+    const cleanId = sanitizeInput(studentId);
     if (!cleanId) {
-      Alert.alert("Required", "Please enter your Student ID or OC email.");
+      Alert.alert("Required", "Please enter your Student ID.");
       return;
     }
     if (!password) {
@@ -146,23 +147,23 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* ── White Card ── */}
-          <View style={styles.card}>
+          <View style={[styles.card, { paddingBottom: Math.max(insets.bottom, 24) + 24 }]}>
 
-            <Text style={styles.label}>Student ID or OC Email</Text>
+            <Text style={styles.label}>Student ID Number</Text>
             <View style={styles.emailInputWrapper}>
               <TextInput
                 style={styles.emailInput}
-                placeholder="e.g. 232C-0018 or joshcarl.fernan"
-                placeholderTextColor="#bbb"
-                value={email}
-                onChangeText={handleEmailChange}
-                autoCapitalize="none"
+                placeholder="e.g. 232C-0018"
+                placeholderTextColor="#8B8B8A"
+                value={studentId}
+                onChangeText={handleIdChange}
+                autoCapitalize="characters"
                 autoCorrect={false}
                 returnKeyType="next"
               />
             </View>
             <Text style={styles.inputSubHint}>
-              Use your Student ID (232C-0018) or institutional email.
+              Enter your official Olivarez College Student ID number.
             </Text>
 
             <Text style={[styles.label, { marginTop: 18 }]}>Password</Text>
@@ -247,16 +248,16 @@ const styles = StyleSheet.create({
   eyeBtn          : { paddingHorizontal: 14 },
   eyeIcon         : { fontSize: 18 },
   forgotBtn       : { alignSelf: "flex-start", marginTop: 10, marginBottom: 4 },
-  forgotText      : { fontSize: 13, fontWeight: "600", color: OC_GOLD },
+  forgotText      : { fontSize: 13, fontWeight: "700", color: OC_GREEN },
   signInBtn       : { backgroundColor: OC_GREEN, borderRadius: 12, paddingVertical: 16, alignItems: "center", marginTop: 24, elevation: 5 },
   signInBtnDisabled: { opacity: 0.7 },
   signInText      : { color: "#fff", fontSize: 16, fontWeight: "700", letterSpacing: 0.5 },
   registerRow     : { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 24, flexWrap: "wrap" },
-  registerText    : { fontSize: 13, color: "#666" },
+  registerText    : { fontSize: 13, color: "#8B8B8A" },
   registerLink    : { fontSize: 13, fontWeight: "700", color: OC_GREEN },
-  lockoutBanner   : { flexDirection: "row", alignItems: "center", backgroundColor: "#fdecea", borderRadius: 10, padding: 12, marginTop: 14, borderLeftWidth: 4, borderLeftColor: "#e53935" },
+  lockoutBanner   : { flexDirection: "row", alignItems: "center", backgroundColor: "#FFEEF1", borderRadius: 10, padding: 12, marginTop: 14, borderLeftWidth: 4, borderLeftColor: "#F10930" },
   lockoutIcon     : { fontSize: 18, marginRight: 8 },
-  lockoutText     : { fontSize: 13, color: "#b71c1c", flex: 1, lineHeight: 18 },
-  warningBanner   : { backgroundColor: "#fff8e1", borderRadius: 10, padding: 10, marginTop: 10, borderLeftWidth: 4, borderLeftColor: "#f9a825" },
-  warningText     : { fontSize: 12, color: "#7a5700", fontWeight: "600" },
+  lockoutText     : { fontSize: 13, color: "#C00624", flex: 1, lineHeight: 18 },
+  warningBanner   : { backgroundColor: "#FBEBB8", borderRadius: 10, padding: 10, marginTop: 10, borderLeftWidth: 4, borderLeftColor: "#377445" },
+  warningText     : { fontSize: 12, color: "#0F5D33", fontWeight: "700" },
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,15 +7,22 @@ import {
   ScrollView,
   Alert,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
-const OC_GREEN = "#164e28";
-const OC_GOLD = "#e5a823";
+const OC_GREEN = "#0F5D33";
+const OC_GOLD = "#FBEBB8";
+const OC_SECONDARY_GREEN = "#377445";
 
 export default function OrderSuccessScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
   const { order } = route.params || {};
+  const ticketRef = useRef(null);
+  const [saving, setSaving] = useState(false);
 
   const orderId = order?.orderId || "OL-1042";
   const pickupDate = order?.date || "Tue, Sep 22 • 9:00 AM";
@@ -23,8 +30,164 @@ export default function OrderSuccessScreen({ navigation, route }) {
   const paidText = `₱${(order?.total || 2425).toFixed(2)} via ${order?.paymentMethod || "Hello Money"}`;
   const currentStep = order?.step || 1; // 1: Placed, 2: Packing, 3: Ready, 4: Claimed
 
-  const handleSaveTicket = () => {
-    Alert.alert("Saved! 📸", "Ticket receipt saved to your photo gallery for easy presentation at Window 2.");
+  const handleSaveTicket = async () => {
+    try {
+      setSaving(true);
+
+      // Build HTML for the PDF ticket
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                background: #f0f4f0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 20px;
+                box-sizing: border-box;
+              }
+              .ticket {
+                background: #ffffff;
+                border-radius: 20px;
+                width: 100%;
+                max-width: 400px;
+                overflow: hidden;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+              }
+              .ticket-header {
+                background: #0F5D33;
+                padding: 20px 24px;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+              }
+              .check-circle {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: #FBEBB8;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                flex-shrink: 0;
+              }
+              .header-text h2 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 20px;
+              }
+              .header-text p {
+                color: #b4d8be;
+                margin: 4px 0 0;
+                font-size: 13px;
+              }
+              .ticket-top {
+                text-align: center;
+                padding: 28px 20px 20px;
+                border-bottom: 2px dashed #ced4da;
+              }
+              .qr-box {
+                width: 150px;
+                height: 150px;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 90px;
+                line-height: 1;
+              }
+              .order-id {
+                font-size: 28px;
+                font-weight: 900;
+                color: #1c2833;
+                letter-spacing: 1px;
+              }
+              .pickup-time {
+                font-size: 14px;
+                font-weight: 700;
+                color: #1a5c2e;
+                margin-top: 4px;
+              }
+              .ticket-bottom {
+                padding: 20px 24px;
+              }
+              .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+                font-size: 13px;
+              }
+              .detail-label { color: #6c757d; }
+              .detail-value { font-weight: 700; color: #1c2833; text-align: right; max-width: 60%; }
+              .footer-note {
+                background: #f0f7f2;
+                padding: 12px 24px;
+                text-align: center;
+                font-size: 12px;
+                color: #0F5D33;
+                font-weight: 600;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="ticket">
+              <div class="ticket-header">
+                <div class="check-circle">✓</div>
+                <div class="header-text">
+                  <h2>Order Placed</h2>
+                  <p>Show this ticket at Window 2</p>
+                </div>
+              </div>
+              <div class="ticket-top">
+                <div class="qr-box">▦</div>
+                <div class="order-id">${orderId}</div>
+                <div class="pickup-time">${pickupDate}</div>
+              </div>
+              <div class="ticket-bottom">
+                <div class="detail-row">
+                  <span class="detail-label">Items</span>
+                  <span class="detail-value">${itemsText}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Paid</span>
+                  <span class="detail-value">${paidText}</span>
+                </div>
+              </div>
+              <div class="footer-note">🎓 Olivarez College — Official Pickup Ticket</div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Generate PDF
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+
+      // Share / Save the PDF
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Save your pickup ticket",
+          UTI: "com.adobe.pdf",
+        });
+      } else {
+        Alert.alert("PDF Ready", `Ticket saved to: ${uri}`);
+      }
+    } catch (err) {
+      console.error("Error generating ticket PDF:", err?.message || err);
+      Alert.alert("Error", "Hindi ma-generate ang PDF ticket. Subukan ulit.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const steps = [
@@ -39,7 +202,7 @@ export default function OrderSuccessScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={OC_GREEN} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 24) + 40 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── TOP HEADER ── */}
@@ -54,7 +217,7 @@ export default function OrderSuccessScreen({ navigation, route }) {
         </View>
 
         {/* ── TICKET CARD ── */}
-        <View style={styles.ticketCard}>
+        <View ref={ticketRef} collapsable={false} renderToHardwareTextureAndroid={true} style={styles.ticketCard}>
           {/* Top section: QR Code & ID */}
           <View style={styles.ticketTop}>
             <View style={styles.qrContainer}>
@@ -129,10 +292,15 @@ export default function OrderSuccessScreen({ navigation, route }) {
         {/* ── ACTION BUTTONS ── */}
         <TouchableOpacity
           activeOpacity={0.88}
-          style={styles.saveBtn}
+          style={[styles.saveBtn, saving && { opacity: 0.7 }]}
           onPress={handleSaveTicket}
+          disabled={saving}
         >
-          <Text style={styles.saveBtnText}>Save ticket to photos</Text>
+          {saving ? (
+            <ActivityIndicator color={OC_GREEN} />
+          ) : (
+            <Text style={styles.saveBtnText}>Save ticket as PDF</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -293,7 +461,7 @@ const styles = StyleSheet.create({
   },
   timelineProgress: {
     height: 3,
-    backgroundColor: OC_GOLD,
+    backgroundColor: OC_SECONDARY_GREEN,
   },
   stepsRow: {
     flexDirection: "row",
@@ -314,10 +482,10 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   stepDotActive: {
-    backgroundColor: OC_GOLD,
+    backgroundColor: OC_SECONDARY_GREEN,
   },
   stepDotCurrent: {
-    backgroundColor: OC_GOLD,
+    backgroundColor: OC_GREEN,
     transform: [{ scale: 1.2 }],
   },
   stepLabel: {
@@ -343,7 +511,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   saveBtnText: {
-    color: "#ffffff",
+    color: OC_GREEN,
     fontSize: 16,
     fontWeight: "800",
   },
