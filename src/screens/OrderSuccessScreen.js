@@ -8,6 +8,7 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -221,7 +222,13 @@ export default function OrderSuccessScreen({ navigation, route }) {
           {/* Top section: QR Code & ID */}
           <View style={styles.ticketTop}>
             <View style={styles.qrContainer}>
-              <MaterialCommunityIcons name="qrcode" size={170} color="#1c2833" />
+              <Image
+                source={{
+                  uri: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(orderId || "OL-DEMO")}`,
+                }}
+                style={{ width: 170, height: 170 }}
+                resizeMode="contain"
+              />
             </View>
 
             <Text style={styles.orderIdText}>{orderId}</Text>
