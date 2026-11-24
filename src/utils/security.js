@@ -1,21 +1,22 @@
 // --- Security Utilities --------------------------------------
 // Centralised helpers for brute-force protection, input
-// sanitisation, auth-token guards, and session timeout.
+// sanitisation, Supabase Auth session guards, and idle timeout.
 // -------------------------------------------------------------
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "../config/supabaseClient";
 
 // -- Constants ------------------------------------------------
-export const MAX_LOGIN_ATTEMPTS  = 5;          // attempts before lockout
-export const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+export const MAX_LOGIN_ATTEMPTS  = 5;              // attempts before lockout
+export const LOCKOUT_DURATION_MS = 5 * 60 * 1000;  // 5 minutes
 export const SESSION_TIMEOUT_MS  = 30 * 60 * 1000; // 30 min idle timeout
 
 // AsyncStorage keys
-const KEY_ATTEMPTS        = "sec_login_attempts";
-const KEY_LOCKOUT_UNTIL   = "sec_lockout_until";
-const KEY_LAST_ACTIVE     = "sec_last_active";
-export const KEY_AUTH_TOKEN    = "auth_token";
-export const KEY_STUDENT_INFO  = "student_info";
+const KEY_ATTEMPTS       = "sec_login_attempts";
+const KEY_LOCKOUT_UNTIL  = "sec_lockout_until";
+const KEY_LAST_ACTIVE    = "sec_last_active";
+export const KEY_AUTH_TOKEN   = "auth_token";
+export const KEY_STUDENT_INFO = "student_info";
 
 // -------------------------------------------------------------
 // BRUTE-FORCE / RATE LIMITING
@@ -26,7 +27,7 @@ export const KEY_STUDENT_INFO  = "student_info";
  * or { locked: false } if the user may attempt login.
  */
 export async function checkLockout() {
-  const until = parseInt(await AsyncStorage.getItem(KEY_LOCKOUT_UNTIL) || "0", 10);
+  const until = parseInt((await AsyncStorage.getItem(KEY_LOCKOUT_UNTIL)) || "0", 10);
   const now   = Date.now();
   if (until > now) return { locked: true, remainingMs: until - now };
   return { locked: false };
@@ -38,8 +39,8 @@ export async function checkLockout() {
  * Returns { attempts, lockedOut }.
  */
 export async function recordFailedAttempt() {
-  const prev      = parseInt(await AsyncStorage.getItem(KEY_ATTEMPTS) || "0", 10);
-  const attempts  = prev + 1;
+  const prev     = parseInt((await AsyncStorage.getItem(KEY_ATTEMPTS)) || "0", 10);
+  const attempts = prev + 1;
   await AsyncStorage.setItem(KEY_ATTEMPTS, String(attempts));
 
   if (attempts >= MAX_LOGIN_ATTEMPTS) {
@@ -58,7 +59,7 @@ export async function clearFailedAttempts() {
 
 /** Returns remaining attempts before lockout. */
 export async function getRemainingAttempts() {
-  const attempts = parseInt(await AsyncStorage.getItem(KEY_ATTEMPTS) || "0", 10);
+  const attempts = parseInt((await AsyncStorage.getItem(KEY_ATTEMPTS)) || "0", 10);
   return Math.max(0, MAX_LOGIN_ATTEMPTS - attempts);
 }
 
@@ -87,20 +88,62 @@ export function isValidMobile(mobile = "") {
 }
 
 // -------------------------------------------------------------
-// AUTH TOKEN GUARD
+// SUPABASE AUTH & TOKEN GUARD
 // -------------------------------------------------------------
 
-/** Returns true if a valid auth token is stored. */
+/**
+ * Returns the active Supabase Auth session if present.
+ */
+export async function getSupabaseSession() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) return null;
+    return data?.session || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns true if the user has an active Supabase Auth session
+ * or a valid stored auth token & profile.
+ */
 export async function isAuthenticated() {
-  const token = await AsyncStorage.getItem(KEY_AUTH_TOKEN);
-  return !!token && token.length > 0;
+  const session = await getSupabaseSession();
+  if (session?.access_token) {
+    return true;
+  }
+  const [token, profileStr] = await Promise.all([
+    AsyncStorage.getItem(KEY_AUTH_TOKEN),
+    AsyncStorage.getItem(KEY_STUDENT_INFO),
+  ]);
+  return Boolean(token && token.length > 0 && profileStr);
+}
+
+/**
+ * Returns the stored user profile and role from AsyncStorage.
+ */
+export async function getStoredUserProfile() {
+  try {
+    const str = await AsyncStorage.getItem(KEY_STUDENT_INFO);
+    if (!str) return null;
+    return JSON.parse(str);
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Performs a full secure logout:
- *  - removes token, student info, session timestamp
+ *  - signs out of Supabase Auth (`supabase.auth.signOut()`)
+ *  - removes token, student info, and session timestamp from AsyncStorage
  */
 export async function secureLogout() {
+  try {
+    await supabase.auth.signOut();
+  } catch (_) {
+    // Ignore sign-out network errors and still purge local storage
+  }
   await AsyncStorage.multiRemove([KEY_AUTH_TOKEN, KEY_STUDENT_INFO, KEY_LAST_ACTIVE]);
 }
 
@@ -118,7 +161,7 @@ export async function touchSession() {
  * If no timestamp is stored, assumes fresh session (not expired).
  */
 export async function isSessionExpired() {
-  const last = parseInt(await AsyncStorage.getItem(KEY_LAST_ACTIVE) || "0", 10);
+  const last = parseInt((await AsyncStorage.getItem(KEY_LAST_ACTIVE)) || "0", 10);
   if (!last) return false;
   return Date.now() - last > SESSION_TIMEOUT_MS;
 }

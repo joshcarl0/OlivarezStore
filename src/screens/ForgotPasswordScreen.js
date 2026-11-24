@@ -1,24 +1,39 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
 
 const OC_GREEN = "#0F5D33";
 const OC_GOLD = "#FBEBB8";
 
 export default function ForgotPasswordScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (!email.trim()) { Alert.alert("Required", "Please enter your OC email."); return; }
+  const handleSubmit = async () => {
+    const clean = email.trim();
+    if (!clean) {
+      Alert.alert("Required", "Please enter your Student ID or OC email.");
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await resetPassword(clean);
+      const targetEmail =
+        res?.data?.email ||
+        (clean.includes("@") ? clean : `${clean.toLowerCase()}@olivarezcollege.edu.ph`);
+      Alert.alert(
+        "Reset Link Sent",
+        res?.message || `Password reset instructions sent to ${targetEmail}`,
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
+    } catch (err) {
+      Alert.alert("Error", err?.message || "Failed to send password reset email.");
+    } finally {
       setLoading(false);
-      Alert.alert("Email Sent", `Password reset instructions sent to ${email}@olivarezcollege.edu.ph`, [
-        { text: "OK", onPress: () => navigation.goBack() }
-      ]);
-    }, 1500);
+    }
   };
 
   return (

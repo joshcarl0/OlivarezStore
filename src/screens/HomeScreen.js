@@ -20,6 +20,7 @@ import {
   touchSession,
 } from "../utils/security";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const OC_GREEN = "#0F5D33";
 const OC_DARK_GREEN = "#0B4626";
@@ -31,7 +32,8 @@ const OC_RED = "#F10930";
 export default function HomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { cart, orders, totalCount } = useCart();
-  const [student, setStudent] = useState(null);
+  const { user, signOut } = useAuth();
+  const [student, setStudent] = useState(user);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("home");
   const sessionTimer = useRef(null);
@@ -96,6 +98,7 @@ export default function HomeScreen({ navigation }) {
         text: "Log Out",
         style: "destructive",
         onPress: async () => {
+          await signOut();
           await secureLogout();
           navigation.replace("Login");
         },

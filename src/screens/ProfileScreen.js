@@ -12,14 +12,17 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { secureLogout } from "../utils/security";
+import { useAuth } from "../context/AuthContext";
 
 const OC_GREEN = "#0F5D33";
 
 export default function ProfileScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const [student, setStudent] = useState(null);
+  const { user, signOut } = useAuth();
+  const [student, setStudent] = useState(user);
 
   useEffect(() => {
+    if (user) setStudent(user);
     (async () => {
       try {
         const str = await AsyncStorage.getItem("student_info");
@@ -28,7 +31,7 @@ export default function ProfileScreen({ navigation }) {
         // silently ignore
       }
     })();
-  }, []);
+  }, [user]);
 
   const handleLogout = async () => {
     Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
@@ -37,6 +40,7 @@ export default function ProfileScreen({ navigation }) {
         text: "Log Out",
         style: "destructive",
         onPress: async () => {
+          await signOut();
           await secureLogout();
           navigation.replace("Login");
         },

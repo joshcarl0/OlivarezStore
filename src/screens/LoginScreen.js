@@ -6,14 +6,14 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ENDPOINTS, apiPost } from "../config/api";
+import { ENDPOINTS } from "../config/api";
+import { useAuth } from "../context/AuthContext";
 import {
   checkLockout,
   recordFailedAttempt,
   clearFailedAttempts,
   getRemainingAttempts,
   sanitizeInput,
-  isValidEmail,
   touchSession,
   formatCountdown,
   MAX_LOGIN_ATTEMPTS,
@@ -24,6 +24,7 @@ const OC_GOLD  = "#FBEBB8";
 
 export default function LoginScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { signIn } = useAuth();
   const [studentId, setStudentId]   = useState("");
   const [password, setPassword]     = useState("");
   const [showPassword, setShowPass] = useState(false);
@@ -96,11 +97,7 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const res = await apiPost(ENDPOINTS.login, {
-        identifier: cleanId,
-        email     : cleanId,
-        password  : password,
-      });
+      const res = await signIn(cleanId, password);
 
       if (res.success) {
         // ── Successful login: clear lockout state & record session ──
@@ -109,7 +106,7 @@ export default function LoginScreen({ navigation }) {
         await AsyncStorage.setItem("student_info", JSON.stringify(res.data.student));
         await touchSession(); // start idle-timeout tracking
         const role = res.data?.role || res.data?.student?.role;
-        if (role === "Store Staff" || role === "Super Admin") {
+        if (role === "Store Staff" || role === "Super Admin" || role === "Cashier") {
           navigation.replace("StaffDashboard");
         } else {
           navigation.replace("Home");
@@ -242,12 +239,12 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea        : { flex: 1, backgroundColor: OC_GREEN },
   scrollContent   : { flexGrow: 1 },
-  header          : { backgroundColor: OC_GREEN, alignItems: "center", paddingTop: 40, paddingBottom: 50, paddingHorizontal: 24 },
-  sealContainer   : { alignItems: "center", justifyContent: "center", marginBottom: 20 },
-  sealImage       : { width: 120, height: 120 },
-  titleMain       : { fontSize: 32, fontWeight: "800", color: "#fff", letterSpacing: 0.5, marginBottom: 4 },
-  titleSub        : { fontSize: 28, fontWeight: "700", color: OC_GOLD, textAlign: "center", lineHeight: 36 },
-  card            : { flex: 1, backgroundColor: "#f7f7f7", borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 28, paddingTop: 36, paddingBottom: 40, minHeight: 420 },
+  header          : { backgroundColor: OC_GREEN, alignItems: "center", paddingTop: 20, paddingBottom: 24, paddingHorizontal: 20 },
+  sealContainer   : { alignItems: "center", justifyContent: "center", marginBottom: 10 },
+  sealImage       : { width: 85, height: 85 },
+  titleMain       : { fontSize: 26, fontWeight: "800", color: "#fff", letterSpacing: 0.5, marginBottom: 2 },
+  titleSub        : { fontSize: 20, fontWeight: "700", color: OC_GOLD, textAlign: "center", lineHeight: 26 },
+  card            : { flex: 1, backgroundColor: "#f7f7f7", borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 32 },
   label           : { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 8 },
   emailInputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 12, borderWidth: 1.5, borderColor: "#e0e0e0", overflow: "hidden" },
   emailInput      : { flex: 1, paddingVertical: 14, paddingHorizontal: 16, fontSize: 15, color: "#222" },

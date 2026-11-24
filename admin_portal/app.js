@@ -8,7 +8,7 @@ let allStudents = [];
 let allStaff = [];
 
 // DOM Ready
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   setupNavigation();
   setupCatalogFilters();
   setupProductModal();
@@ -19,17 +19,43 @@ document.addEventListener("DOMContentLoaded", () => {
   setupResetPasswordModal();
   setupImageUploader();
 
-  // Load initial data
-  loadAnalytics();
-  loadCatalog();
-  loadOrders();
-  loadUsers();
+  // Enforce Supabase Auth & Protected Route Guard before loading data
+  await enforceAdminProtectedRoute();
 
   document.getElementById("btnRefreshAnalytics")?.addEventListener("click", () => {
     loadAnalytics();
     showToast("Synced live data with database.");
   });
 });
+
+async function loadAllProtectedAdminData() {
+  await Promise.all([
+    loadAnalytics(),
+    loadCatalog(),
+    loadOrders(),
+    loadUsers(),
+  ]);
+}
+
+async function enforceAdminProtectedRoute() {
+  const authed = window.ocAdminAuth ? await window.ocAdminAuth.isAuthenticated() : false;
+  const modal = document.getElementById("loginModal");
+  const btnClose = document.getElementById("btnLoginModalClose");
+  const btnCancel = document.getElementById("btnCancelLoginModal");
+
+  if (authed) {
+    if (btnClose) btnClose.style.display = "";
+    if (btnCancel) btnCancel.style.display = "";
+    const user = window.ocAdminAuth.getCurrentUser();
+    if (user) updateCurrentAdminUI(user);
+    await loadAllProtectedAdminData();
+  } else {
+    // Lock portal behind mandatory authentication modal
+    if (btnClose) btnClose.style.display = "none";
+    if (btnCancel) btnCancel.style.display = "none";
+    modal?.classList.add("active");
+  }
+}
 
 /* ── TOAST NOTIFICATIONS ── */
 function showToast(message) {
@@ -73,7 +99,7 @@ function capitalize(s) {
 /* ── TAB 1: EXECUTIVE KPI & ANALYTICS ── */
 async function loadAnalytics() {
   try {
-    const res = await fetch(`${API_BASE}/get_analytics.php`);
+    const res = await apiFetch(`${API_BASE}/get_analytics.php`);
     const json = await res.json();
     if (!json.success || !json.data) return;
 
@@ -262,7 +288,7 @@ function renderRecentOrders(orders) {
 async function loadCatalog() {
   const container = document.getElementById("productsGrid");
   try {
-    const res = await fetch(`${API_BASE}/get_inventory.php`);
+    const res = await apiFetch(`${API_BASE}/get_inventory.php`);
     const json = await res.json();
     if (!json.success || !Array.isArray(json.data)) return;
 
@@ -389,7 +415,7 @@ function setupImageUploader() {
 
     try {
       showToast("Uploading uniform photograph to server...");
-      const res = await fetch(`${API_BASE}/upload_image.php`, {
+      const res = await apiFetch(`${API_BASE}/upload_image.php`, {
         method: "POST",
         body: formData,
       });
@@ -467,7 +493,7 @@ function setupProductModal() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/save_product.php`, {
+      const res = await apiFetch(`${API_BASE}/save_product.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -530,7 +556,7 @@ window.deleteProduct = async function (id, name) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/delete_product.php`, {
+    const res = await apiFetch(`${API_BASE}/delete_product.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, permanent: false }),
@@ -574,7 +600,7 @@ function setupStockModal() {
     const amount = parseInt(input.value) || 0;
 
     try {
-      const res = await fetch(`${API_BASE}/update_stock.php`, {
+      const res = await apiFetch(`${API_BASE}/update_stock.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_id: id, quantity_change: amount }),
@@ -606,7 +632,7 @@ window.openStockModal = function (id, name, currentStock) {
 async function loadOrders() {
   const tbody = document.getElementById("masterOrdersTableBody");
   try {
-    const res = await fetch(`${API_BASE}/get_staff_orders.php`);
+    const res = await apiFetch(`${API_BASE}/get_staff_orders.php`);
     const json = await res.json();
     if (!json.success || !Array.isArray(json.data)) return;
 
@@ -673,7 +699,7 @@ function renderMasterOrders() {
 
 window.updateMasterOrderStatus = async function (orderId, newStatus) {
   try {
-    const res = await fetch(`${API_BASE}/update_order_status.php`, {
+    const res = await apiFetch(`${API_BASE}/update_order_status.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ order_id: orderId, status: newStatus }),
@@ -694,7 +720,7 @@ window.updateMasterOrderStatus = async function (orderId, newStatus) {
 /* ── TAB 4 & 5: USERS (STUDENTS & STAFF) ── */
 async function loadUsers() {
   try {
-    const res = await fetch(`${API_BASE}/get_users.php`);
+    const res = await apiFetch(`${API_BASE}/get_users.php`);
     const json = await res.json();
     if (!json.success || !json.data) return;
 
@@ -909,7 +935,7 @@ function setupStaffModal() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/get_users.php`, {
+      const res = await apiFetch(`${API_BASE}/get_users.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -932,7 +958,7 @@ function setupStaffModal() {
 
 window.toggleStaffActive = async function (id, newActive) {
   try {
-    const res = await fetch(`${API_BASE}/get_users.php`, {
+    const res = await apiFetch(`${API_BASE}/get_users.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "toggle_active", id, is_active: newActive }),
@@ -955,7 +981,7 @@ window.deleteStaffAccount = async function (id, username) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/get_users.php`, {
+    const res = await apiFetch(`${API_BASE}/get_users.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "delete_staff", id }),
@@ -996,7 +1022,11 @@ function setupLoginModal() {
     modal?.classList.add("active");
   };
 
-  const closeModal = () => modal?.classList.remove("active");
+  const closeModal = async () => {
+    const authed = window.ocAdminAuth ? await window.ocAdminAuth.isAuthenticated() : true;
+    if (!authed) return; // Prevent closing login gate when unauthenticated
+    modal?.classList.remove("active");
+  };
 
   userPill?.addEventListener("click", openModal);
   btnSwitch?.addEventListener("click", openModal);
@@ -1009,7 +1039,7 @@ function setupLoginModal() {
     const password = document.getElementById("loginPassword").value;
 
     try {
-      const res = await fetch(`${API_BASE}/login.php`, {
+      const res = await apiFetch(`${API_BASE}/login.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
@@ -1018,9 +1048,13 @@ function setupLoginModal() {
       if (data.success && data.data?.user) {
         const user = data.data.user;
         localStorage.setItem("oc_current_admin", JSON.stringify(user));
+        if (data.data.token) localStorage.setItem("admin_token", data.data.token);
         updateCurrentAdminUI(user);
+        if (btnClose) btnClose.style.display = "";
+        if (btnCancel) btnCancel.style.display = "";
+        modal?.classList.remove("active");
         showToast(`Welcome, ${user.name || user.username}! Logged in as ${user.role || "Staff"}.`);
-        closeModal();
+        await loadAllProtectedAdminData();
       } else {
         alert("Login failed: " + (data.message || "Invalid credentials"));
       }
@@ -1071,7 +1105,7 @@ function setupResetPasswordModal() {
     const newPassword = input.value.trim();
 
     try {
-      const res = await fetch(`${API_BASE}/get_users.php`, {
+      const res = await apiFetch(`${API_BASE}/get_users.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "reset_password", id, new_password: newPassword }),
@@ -1111,10 +1145,16 @@ function escapeHtml(str) {
 }
 
 // ─── ADMIN LOGOUT ──────────────────────────────────────────
-window.handleAdminLogout = function () {
+window.handleAdminLogout = async function () {
   if (confirm("Are you sure you want to sign out from the Super Admin Executive Portal?")) {
-    sessionStorage.removeItem("olivarez_admin_user");
-    localStorage.removeItem("admin_token");
-    window.location.href = window.location.origin + "/";
+    if (window.ocAdminAuth) {
+      await window.ocAdminAuth.signOut();
+    } else {
+      sessionStorage.removeItem("olivarez_admin_user");
+      localStorage.removeItem("oc_current_admin");
+      localStorage.removeItem("admin_token");
+    }
+    await enforceAdminProtectedRoute();
+    showToast("Signed out of Super Admin Portal.");
   }
 };

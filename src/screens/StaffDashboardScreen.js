@@ -20,8 +20,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { ENDPOINTS } from "../config/api";
+import { ENDPOINTS, apiGet, apiPost } from "../config/api";
 import { secureLogout } from "../utils/security";
+import { useAuth } from "../context/AuthContext";
 
 const OC_GREEN = "#0F5D33";
 const OC_DARK_GREEN = "#0B4626";
@@ -32,7 +33,8 @@ const OC_LIGHT_BG = "#f4f7f5";
 
 export default function StaffDashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const [staffInfo, setStaffInfo] = useState(null);
+  const { user, signOut } = useAuth();
+  const [staffInfo, setStaffInfo] = useState(user);
   const [activeTab, setActiveTab] = useState("scan"); // "overview", "scan", "queue", "inventory"
   const [analytics, setAnalytics] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -126,11 +128,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const loadUsers = async () => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_users.php`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
-      const data = await res.json();
+      const data = await apiGet("get_users");
       if (data.success && data.data) {
         setUsersList(data.data);
       }
@@ -141,11 +139,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const loadAnalytics = async () => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_analytics.php`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
-      const data = await res.json();
+      const data = await apiGet("get_analytics");
       if (data.success && data.data) {
         setAnalytics(data.data);
       }
@@ -255,27 +249,18 @@ export default function StaffDashboardScreen({ navigation }) {
 
     setSavingProduct(true);
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/save_product.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify({
-          id: editingProduct?.id || 0,
-          name: prodName.trim(),
-          category: prodCategory,
-          department: prodDept,
-          course_strand: prodCourse.trim() || "All",
-          gender: prodGender,
-          price: priceNum,
-          stock: isNaN(stockNum) ? 0 : stockNum,
-          sizes: prodSizes,
-          image_url: prodImageUrl.trim(),
-        }),
+      const result = await apiPost("save_product", {
+        id: editingProduct?.id || 0,
+        name: prodName.trim(),
+        category: prodCategory,
+        department: prodDept,
+        course_strand: prodCourse.trim() || "All",
+        gender: prodGender,
+        price: priceNum,
+        stock: isNaN(stockNum) ? 0 : stockNum,
+        sizes: prodSizes,
+        image_url: prodImageUrl.trim(),
       });
-      const result = await res.json();
       if (result.success) {
         Alert.alert("Success", editingProduct ? "Uniform updated!" : "New uniform added to catalog!");
         setProductModalVisible(false);
@@ -302,16 +287,7 @@ export default function StaffDashboardScreen({ navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
-              const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-              const res = await fetch(`${baseUrl}/delete_product.php`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "ngrok-skip-browser-warning": "true",
-                },
-                body: JSON.stringify({ id: prod.id }),
-              });
-              const data = await res.json();
+              const data = await apiPost("delete_product", { id: prod.id });
               if (data.success) {
                 Alert.alert("Removed", `"${prod.name}" has been archived.`);
                 await Promise.all([loadInventory(), loadAnalytics()]);
@@ -334,24 +310,15 @@ export default function StaffDashboardScreen({ navigation }) {
     }
     setSavingStaff(true);
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_users.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify({
-          action: newStaffRole === "Super Admin" ? "create_admin" : "create_staff",
-          username: newStaffUsername.trim().toLowerCase(),
-          full_name: newStaffName.trim(),
-          email: newStaffEmail.trim() || `${newStaffUsername.trim().toLowerCase()}@olivarezcollege.edu.ph`,
-          role: newStaffRole,
-          station: newStaffStation.trim(),
-          password: newStaffPassword.trim() || "Staff2026!",
-        }),
+      const data = await apiPost("manage_user", {
+        action: newStaffRole === "Super Admin" ? "create_admin" : "create_staff",
+        username: newStaffUsername.trim().toLowerCase(),
+        full_name: newStaffName.trim(),
+        email: newStaffEmail.trim() || `${newStaffUsername.trim().toLowerCase()}@olivarezcollege.edu.ph`,
+        role: newStaffRole,
+        station: newStaffStation.trim(),
+        password: newStaffPassword.trim() || "Staff2026!",
       });
-      const data = await res.json();
       if (data.success) {
         Alert.alert("Created", `${newStaffRole} account "${newStaffUsername}" created successfully!`);
         setStaffModalVisible(false);
@@ -380,20 +347,11 @@ export default function StaffDashboardScreen({ navigation }) {
           text: "Reset Password",
           onPress: async () => {
             try {
-              const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-              const res = await fetch(`${baseUrl}/get_users.php`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "ngrok-skip-browser-warning": "true",
-                },
-                body: JSON.stringify({
-                  action: "reset_password",
-                  id: staffUser.id,
-                  new_password: "Staff2026!",
-                }),
+              const data = await apiPost("manage_user", {
+                action: "reset_password",
+                id: staffUser.id,
+                new_password: "Staff2026!",
               });
-              const data = await res.json();
               if (data.success) {
                 Alert.alert("Password Reset", `Password is now: Staff2026!`);
               } else {
@@ -411,20 +369,11 @@ export default function StaffDashboardScreen({ navigation }) {
   const handleToggleStaffActive = async (staffUser) => {
     const newStatus = staffUser.is_active == 1 ? 0 : 1;
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_users.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify({
-          action: "toggle_active",
-          id: staffUser.id,
-          is_active: newStatus,
-        }),
+      const data = await apiPost("manage_user", {
+        action: "toggle_active",
+        id: staffUser.id,
+        is_active: newStatus,
       });
-      const data = await res.json();
       if (data.success) {
         await loadUsers();
       } else {
@@ -437,11 +386,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const loadOrders = async () => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_staff_orders.php`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
-      const data = await res.json();
+      const data = await apiGet("get_staff_orders");
       if (data.success && Array.isArray(data.data)) {
         setOrders(data.data);
         if (selectedOrder) {
@@ -462,11 +407,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const loadInventory = async () => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_inventory.php`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
-      const data = await res.json();
+      const data = await apiGet(ENDPOINTS.products);
       if (data.success && Array.isArray(data.data)) {
         setInventory(data.data);
       }
@@ -484,11 +425,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
     setSearching(true);
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/get_staff_orders.php?search=${encodeURIComponent(raw)}`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
-      const data = await res.json();
+      const data = await apiGet(`get_staff_orders?search=${encodeURIComponent(raw)}`);
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         selectOrder(data.data[0]);
         loadOrders();
@@ -622,16 +559,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const updateStatus = async (orderId, newStatus) => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      const res = await fetch(`${baseUrl}/update_order_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify({ order_id: orderId, status: newStatus }),
-      });
-      const data = await res.json();
+      const data = await apiPost("update_order_status", { order_id: orderId, status: newStatus });
       if (data.success) {
         Alert.alert("Order Updated! ✅", `Order has been marked as ${newStatus === "Completed" ? "Claimed & Released!" : "Ready for Pickup!"}`);
         setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : null);
@@ -646,15 +574,7 @@ export default function StaffDashboardScreen({ navigation }) {
 
   const adjustStock = async (productId, action, amount) => {
     try {
-      const baseUrl = ENDPOINTS.login.replace("/login.php", "");
-      await fetch(`${baseUrl}/update_stock.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify({ product_id: productId, action, amount }),
-      });
+      await apiPost("update_stock", { product_id: productId, action, amount });
       loadInventory();
     } catch (err) {
       console.log(err);
@@ -668,6 +588,7 @@ export default function StaffDashboardScreen({ navigation }) {
         text: "Log Out",
         style: "destructive",
         onPress: async () => {
+          await signOut();
           await secureLogout();
           navigation.replace("Login");
         },

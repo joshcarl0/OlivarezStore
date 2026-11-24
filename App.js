@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { View, Text, ActivityIndicator, StyleSheet, Image, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ActivityIndicator, View } from "react-native";
 
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
@@ -18,76 +18,109 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import StaffDashboardScreen from "./src/screens/StaffDashboardScreen";
 
 import { CartProvider } from "./src/context/CartContext";
-import { isAuthenticated, isSessionExpired, secureLogout } from "./src/utils/security";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import { withProtectedRoute } from "./src/components/ProtectedRoute";
 
 const Stack = createNativeStackNavigator();
+const OC_GREEN = "#0F5D33";
+const OC_GOLD = "#FBEBB8";
 
-export default function App() {
-  const [initialRoute, setInitialRoute] = useState(null); // null = loading
+// Protected Student & Shared Screens
+const ProtectedHomeScreen = withProtectedRoute(HomeScreen);
+const ProtectedShopScreen = withProtectedRoute(ShopScreen);
+const ProtectedProductDetailScreen = withProtectedRoute(ProductDetailScreen);
+const ProtectedCartScreen = withProtectedRoute(CartScreen);
+const ProtectedCheckoutScreen = withProtectedRoute(CheckoutScreen);
+const ProtectedOrderSuccessScreen = withProtectedRoute(OrderSuccessScreen);
+const ProtectedOrdersScreen = withProtectedRoute(OrdersScreen);
+const ProtectedProfileScreen = withProtectedRoute(ProfileScreen);
 
-  // ── Determine initial route based on stored auth token ──
-  useEffect(() => {
-    (async () => {
-      try {
-        const authenticated = await isAuthenticated();
-        if (authenticated) {
-          const expired = await isSessionExpired();
-          if (expired) {
-            await secureLogout();
-            setInitialRoute("Login");
-          } else {
-            const studentInfoStr = await AsyncStorage.getItem("student_info");
-            const studentInfo = studentInfoStr ? JSON.parse(studentInfoStr) : null;
-            if (studentInfo?.role === "Store Staff" || studentInfo?.role === "Super Admin") {
-              setInitialRoute("StaffDashboard");
-            } else {
-              setInitialRoute("Home");
-            }
-          }
-        } else {
-          setInitialRoute("Login");
-        }
-      } catch {
-        setInitialRoute("Login");
-      }
-    })();
-  }, []);
+// Role-Protected Staff & Super Admin Screen
+const ProtectedStaffDashboardScreen = withProtectedRoute(StaffDashboardScreen, {
+  allowedRoles: ["Store Staff", "Super Admin", "Cashier"],
+});
 
-  // Show a blank loading screen while checking auth state
-  if (initialRoute === null) {
+function RootNavigator() {
+  const { loading, isAuthenticated, isStaffOrAdmin } = useAuth();
+
+  if (loading) {
     return (
-      <SafeAreaProvider>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#0F5D33" }}>
-          <ActivityIndicator size="large" color="#FBEBB8" />
-        </View>
-      </SafeAreaProvider>
+      <View style={styles.splashContainer}>
+        <StatusBar barStyle="light-content" backgroundColor={OC_GREEN} />
+        <Image
+          source={require("./assets/OC-LOGO.png")}
+          style={styles.splashLogo}
+          resizeMode="contain"
+        />
+        <Text style={styles.splashTitle}>Olivarian Uniform Store</Text>
+        <ActivityIndicator size="large" color={OC_GOLD} style={{ marginTop: 18 }} />
+      </View>
     );
   }
 
+  const initialRouteName = !isAuthenticated
+    ? "Login"
+    : isStaffOrAdmin
+    ? "StaffDashboard"
+    : "Home";
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={initialRouteName}
+        screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      >
+        {/* Public Auth Routes */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+
+        {/* Protected Authenticated Routes */}
+        <Stack.Screen name="Home" component={ProtectedHomeScreen} />
+        <Stack.Screen name="Shop" component={ProtectedShopScreen} />
+        <Stack.Screen name="ProductDetail" component={ProtectedProductDetailScreen} />
+        <Stack.Screen name="Cart" component={ProtectedCartScreen} />
+        <Stack.Screen name="Checkout" component={ProtectedCheckoutScreen} />
+        <Stack.Screen name="OrderSuccess" component={ProtectedOrderSuccessScreen} />
+        <Stack.Screen name="Orders" component={ProtectedOrdersScreen} />
+        <Stack.Screen name="Profile" component={ProtectedProfileScreen} />
+
+        {/* Role-Protected Staff / Admin Route */}
+        <Stack.Screen name="StaffDashboard" component={ProtectedStaffDashboardScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
   return (
     <SafeAreaProvider>
-      <CartProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName={initialRoute}
-            screenOptions={{ headerShown: false, animation: "slide_from_right" }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Shop" component={ShopScreen} />
-            <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
-            <Stack.Screen name="Cart" component={CartScreen} />
-            <Stack.Screen name="Checkout" component={CheckoutScreen} />
-            <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
-            <Stack.Screen name="Orders" component={OrdersScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="StaffDashboard" component={StaffDashboardScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <RootNavigator />
+        </CartProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    backgroundColor: OC_GREEN,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  splashLogo: {
+    width: 88,
+    height: 88,
+    marginBottom: 12,
+  },
+  splashTitle: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+  },
+});

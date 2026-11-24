@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
-import { ENDPOINTS } from "../config/api";
+import { ENDPOINTS, apiGet } from "../config/api";
 import { useCart } from "../context/CartContext";
 
 const OC_GREEN = "#0F5D33";
@@ -121,10 +121,7 @@ export default function ShopScreen({ navigation, route }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(ENDPOINTS.products, {
-          headers: { "ngrok-skip-browser-warning": "true" },
-        });
-        const data = await res.json();
+        const data = await apiGet(ENDPOINTS.products);
         if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
           const merged = data.data.map((item) => {
             let imageType = "blouse";
